@@ -1,3 +1,4 @@
+use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
 use axum::{
@@ -10,6 +11,7 @@ use std::sync::OnceLock;
 
 pub static SHORT_MEM: OnceLock<ShortTermMemory> = OnceLock::new();
 pub static LONG_MEM: OnceLock<LongTermMemory> = OnceLock::new();
+pub static LATENT_MEM: OnceLock<LatentMemory> = OnceLock::new();
 
 fn mem() -> &'static ShortTermMemory {
     SHORT_MEM.get_or_init(ShortTermMemory::new)
@@ -58,4 +60,31 @@ pub async fn set_long_mem(
     let mem = long_mem().await;
     mem.set(&key, &payload.value).await;
     (StatusCode::OK, "stored").into_response()
+}
+
+#[derive(Deserialize)]
+pub struct EmbedPayload {
+    id: String,
+    content: String,
+}
+
+pub async fn embed_latent(Json(payload): Json<EmbedPayload>) -> impl IntoResponse {
+    let mem = LATENT_MEM.get().expect("LatentMemory not initialized");
+    match mem.embed(&payload.id, &payload.content).await {
+        Ok(_) => (StatusCode::OK, "embedded").into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
+    }
+}
+
+#[derive(Deserialize)]
+pub struct QueryPayload {
+    content: String,
+}
+
+pub async fn query_latent(Json(payload): Json<QueryPayload>) -> impl IntoResponse {
+    let mem = LATENT_MEM.get().expect("LatentMemory not initialized");
+    match mem.query(&payload.content).await {
+        Ok(results) => Json(results).into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
+    }
 }

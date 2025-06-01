@@ -1,7 +1,7 @@
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LatentMemory {
     pub chroma_url: String,
     client: Client,

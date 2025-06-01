@@ -22,9 +22,14 @@ async fn main() {
     use api::handlers::LONG_MEM;
     use memory::long_term::LongTermMemory;
 
+    use api::handlers::LATENT_MEM;
+    use memory::latent::LatentMemory;
+
     let long = LongTermMemory::new("memory.db").await;
+    let latent = LatentMemory::new(settings.chromadb_url.clone());
 
     LONG_MEM.set(long).unwrap();
+    LATENT_MEM.set(latent).unwrap();
 
     // Define routes
     let app = Router::new()

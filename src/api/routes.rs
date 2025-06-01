@@ -11,4 +11,6 @@ pub fn routes() -> Router {
         .route("/mem/short/:key", post(handlers::set_short_mem))
         .route("/mem/long/:key", get(handlers::get_long_mem))
         .route("/mem/long/:key", post(handlers::set_long_mem))
+        .route("/mem/latent/embed", post(handlers::embed_latent))
+        .route("/mem/latent/query", post(handlers::query_latent))
 }

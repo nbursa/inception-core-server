@@ -1,0 +1,10 @@
+services:
+  chromadb:
+    image: chromadb/chroma:0.6.3
+    ports:
+      - "8000:8000"
+    environment:
+      - IS_PERSISTENT=FALSE
+      - ANONYMIZED_TELEMETRY=FALSE
+    volumes:
+      - /tmp/chroma:/tmp/chroma
