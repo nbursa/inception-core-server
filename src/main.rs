@@ -22,7 +22,8 @@ async fn main() {
     use api::handlers::LONG_MEM;
     use memory::long_term::LongTermMemory;
 
-    let long = LongTermMemory::new("sqlite://memory.db").await;
+    let long = LongTermMemory::new("memory.db").await;
+
     LONG_MEM.set(long).unwrap();
 
     // Define routes
