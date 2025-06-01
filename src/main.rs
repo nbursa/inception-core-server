@@ -26,7 +26,7 @@ async fn main() {
     use memory::latent::LatentMemory;
 
     let long = LongTermMemory::new("memory.db").await;
-    let latent = LatentMemory::new(settings.chromadb_url.clone());
+    let latent = LatentMemory::new(settings.chromadb_url.clone()).await;
 
     LONG_MEM.set(long).unwrap();
     LATENT_MEM.set(latent).unwrap();
