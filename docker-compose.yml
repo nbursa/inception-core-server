@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  mcp_server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MCP_ENV=production
+      - CHROMADB_URL=http://chromadb:8000
+    depends_on:
+      - chromadb
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
