@@ -69,8 +69,9 @@ pub struct EmbedPayload {
 }
 
 pub async fn embed_latent(Json(payload): Json<EmbedPayload>) -> impl IntoResponse {
-    let mem = LATENT_MEM.get().expect("LatentMemory not initialized");
-    match mem.embed(&payload.id, &payload.content).await {
+    let mem = LATENT_MEM.get().unwrap();
+    let dummy_vec = vec![0.0; 1536]; // stub
+    match mem.embed(&payload.id, dummy_vec).await {
         Ok(_) => (StatusCode::OK, "embedded").into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }
@@ -82,8 +83,9 @@ pub struct QueryPayload {
 }
 
 pub async fn query_latent(Json(payload): Json<QueryPayload>) -> impl IntoResponse {
-    let mem = LATENT_MEM.get().expect("LatentMemory not initialized");
-    match mem.query(&payload.content).await {
+    let mem = LATENT_MEM.get().unwrap();
+    let dummy_vec = vec![0.0; 1536]; // stub
+    match mem.query(dummy_vec).await {
         Ok(results) => Json(results).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }

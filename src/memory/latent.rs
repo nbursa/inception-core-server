@@ -1,5 +1,5 @@
 use reqwest::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
 pub struct LatentMemory {
@@ -15,15 +15,21 @@ impl LatentMemory {
         }
     }
 
-    pub async fn embed(&self, id: &str, content: &str) -> Result<(), String> {
+    // 🧠 Dummy embed: koristi f32 vektor kao ulaz
+    pub async fn embed(&self, id: &str, embedding: Vec<f32>) -> Result<(), String> {
+        let collection_id = "1414cedf-3081-4235-ab29-656549bdff1a";
         let payload = serde_json::json!({
             "ids": [id],
-            "documents": [content],
+            "embeddings": [embedding],
+            "metadatas": [{"source": "stub"}]
         });
 
         let res = self
             .client
-            .post(format!("{}/collections/mem/docs", self.chroma_url))
+            .post(format!(
+                "{}/api/v2/tenants/default_tenant/databases/default_database/collections/{}/add",
+                self.chroma_url, collection_id
+            ))
             .json(&payload)
             .send()
             .await
@@ -32,19 +38,23 @@ impl LatentMemory {
         if res.status().is_success() {
             Ok(())
         } else {
-            Err(format!("Chroma error: {}", res.status()))
+            Err(format!("Chroma embed error: {}", res.status()))
         }
     }
 
-    pub async fn query(&self, content: &str) -> Result<Vec<String>, String> {
+    pub async fn query(&self, embedding: Vec<f32>) -> Result<Vec<String>, String> {
+        let collection_id = "1414cedf-3081-4235-ab29-656549bdff1a";
         let payload = serde_json::json!({
-            "query_texts": [content],
+            "query_embeddings": [embedding],
             "n_results": 3
         });
 
         let res = self
             .client
-            .post(format!("{}/collections/mem/query", self.chroma_url))
+            .post(format!(
+                "{}/api/v2/tenants/default_tenant/databases/default_database/collections/{}/query",
+                self.chroma_url, collection_id
+            ))
             .json(&payload)
             .send()
             .await
