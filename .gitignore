@@ -1,2 +1,4 @@
 /target
 .env*
+memory.db
+/backups/
