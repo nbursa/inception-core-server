@@ -1,7 +1,12 @@
-use axum::{Router, routing::get};
-
 use super::handlers;
+use axum::{
+    Router,
+    routing::{get, post},
+};
 
 pub fn routes() -> Router {
-    Router::new().route("/ping", get(handlers::ping))
+    Router::new()
+        .route("/ping", get(handlers::ping))
+        .route("/mem/short/:key", get(handlers::get_short_mem))
+        .route("/mem/short/:key", post(handlers::set_short_mem))
 }
