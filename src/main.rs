@@ -19,6 +19,12 @@ async fn main() {
     let settings = config::settings::Settings::new();
     tracing::info!("Starting MCP server in {} mode", settings.env);
 
+    use api::handlers::LONG_MEM;
+    use memory::long_term::LongTermMemory;
+
+    let long = LongTermMemory::new("sqlite:memory.db").await;
+    LONG_MEM.set(long).unwrap();
+
     // Define routes
     let app = Router::new()
         .route("/health", get(health_check))

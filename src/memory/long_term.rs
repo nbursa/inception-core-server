@@ -1,16 +1,18 @@
 use sqlx::{Pool, Row, Sqlite, sqlite::SqlitePoolOptions};
-use std::time::Duration;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LongTermMemory {
     pool: Pool<Sqlite>,
 }
 
 impl LongTermMemory {
     pub async fn new(database_url: &str) -> Self {
+        let options = sqlx::sqlite::SqliteConnectOptions::new()
+            .filename(database_url)
+            .create_if_missing(true);
+
         let pool = SqlitePoolOptions::new()
-            .connect_timeout(Duration::from_secs(5))
-            .connect(database_url)
+            .connect_with(options)
             .await
             .expect("Failed to connect to SQLite");
 
