@@ -11,6 +11,7 @@ use crate::memory::long_term::LongTermMemory;
 mod agents;
 mod api;
 mod config;
+mod mcp;
 pub mod memory;
 
 #[tokio::main]

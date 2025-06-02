@@ -1,4 +1,6 @@
 use crate::agents::{AGENT, agent::BaseAgent};
+use crate::mcp::model;
+use crate::mcp::protocol::MCPError;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
@@ -102,6 +104,13 @@ pub async fn chat(Json(payload): Json<ChatPayload>) -> impl IntoResponse {
 
     match agent.handle(&payload.message).await {
         Some(response) => Json(response).into_response(),
-        None => Json("(unhandled by agent)".to_string()).into_response(),
+        None => match model::generate(&payload.message).await {
+            Ok(response) => Json(response).into_response(),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("LLM error: {}", e),
+            )
+                .into_response(),
+        },
     }
 }
