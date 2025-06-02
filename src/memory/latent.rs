@@ -1,5 +1,6 @@
 use reqwest::Client;
 use serde::Deserialize;
+use std::env;
 use std::fs;
 use std::path::Path;
 
@@ -15,7 +16,9 @@ impl LatentMemory {
         let client = Client::new();
         let path = ".chroma";
 
-        let collection_id = if Path::new(path).exists() {
+        let collection_id = if let Ok(env_id) = env::var("CHROMA_COLLECTION_ID") {
+            env_id
+        } else if Path::new(path).exists() {
             fs::read_to_string(path)
                 .expect("failed to read .chroma")
                 .trim()
