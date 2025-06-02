@@ -3,3 +3,4 @@
 memory.db
 /backups/
 .chroma
+.DS_Store
