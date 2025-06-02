@@ -3,27 +3,24 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing_subscriber::{EnvFilter, fmt};
 
+use crate::agents::{AGENT, agent::BaseAgent};
+use crate::api::handlers::{LATENT_MEM, LONG_MEM};
+use crate::memory::latent::LatentMemory;
+use crate::memory::long_term::LongTermMemory;
+
+mod agents;
 mod api;
 mod config;
 pub mod memory;
 
 #[tokio::main]
 async fn main() {
-    // Load .env variables
     dotenvy::dotenv().ok();
 
-    // Init logger
     fmt().with_env_filter(EnvFilter::from_default_env()).init();
 
-    // Load settings
     let settings = config::settings::Settings::new();
     tracing::info!("Starting MCP server in {} mode", settings.env);
-
-    use api::handlers::LONG_MEM;
-    use memory::long_term::LongTermMemory;
-
-    use api::handlers::LATENT_MEM;
-    use memory::latent::LatentMemory;
 
     let long = LongTermMemory::new("memory.db").await;
     let latent = LatentMemory::new(settings.chromadb_url.clone()).await;
@@ -31,12 +28,13 @@ async fn main() {
     LONG_MEM.set(long).unwrap();
     LATENT_MEM.set(latent).unwrap();
 
-    // Define routes
+    let agent = BaseAgent::new();
+    AGENT.set(agent).unwrap();
+
     let app = Router::new()
         .route("/health", get(health_check))
         .nest("/api", api::routes::routes());
 
-    // Start server
     let addr: SocketAddr = "0.0.0.0:8080".parse().unwrap();
     let listener = TcpListener::bind(addr).await.unwrap();
     tracing::info!("Listening on http://{}", addr);

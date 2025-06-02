@@ -1,3 +1,4 @@
+use crate::agents::{AGENT, agent::BaseAgent};
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
@@ -70,7 +71,7 @@ pub struct EmbedPayload {
 
 pub async fn embed_latent(Json(payload): Json<EmbedPayload>) -> impl IntoResponse {
     let mem = LATENT_MEM.get().unwrap();
-    let dummy_vec = vec![0.0; 1536]; // stub
+    let dummy_vec = vec![0.0; 1536];
     match mem.embed(&payload.id, dummy_vec).await {
         Ok(_) => (StatusCode::OK, "embedded").into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
@@ -84,9 +85,23 @@ pub struct QueryPayload {
 
 pub async fn query_latent(Json(payload): Json<QueryPayload>) -> impl IntoResponse {
     let mem = LATENT_MEM.get().unwrap();
-    let dummy_vec = vec![0.0; 1536]; // stub
+    let dummy_vec = vec![0.0; 1536];
     match mem.query(dummy_vec).await {
         Ok(results) => Json(results).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
+    }
+}
+
+#[derive(Deserialize)]
+pub struct ChatPayload {
+    message: String,
+}
+
+pub async fn chat(Json(payload): Json<ChatPayload>) -> impl IntoResponse {
+    let agent = AGENT.get().unwrap();
+
+    match agent.handle(&payload.message).await {
+        Some(response) => Json(response).into_response(),
+        None => Json("(unhandled by agent)".to_string()).into_response(),
     }
 }
