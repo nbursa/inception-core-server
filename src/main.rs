@@ -5,6 +5,7 @@ use tracing_subscriber::{EnvFilter, fmt};
 
 use crate::agents::{AGENT, agent::BaseAgent};
 use crate::api::handlers::{LATENT_MEM, LONG_MEM};
+use crate::mcp::context::Context;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 
@@ -31,6 +32,16 @@ async fn main() {
 
     let agent = BaseAgent::new();
     AGENT.set(agent).unwrap();
+
+    // Context test
+    let ctx = Context::new();
+    ctx.set("mood", "curious");
+
+    if let Some(value) = ctx.get("mood") {
+        println!("Context test passed: mood = {}", value);
+    } else {
+        println!("Context test failed");
+    }
 
     let app = Router::new()
         .route("/health", get(health_check))
