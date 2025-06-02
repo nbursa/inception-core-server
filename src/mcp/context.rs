@@ -28,4 +28,11 @@ impl Context {
             map.clear();
         }
     }
+
+    pub fn all(&self) -> Vec<(String, String)> {
+        self.data
+            .read()
+            .map(|map| map.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
+            .unwrap_or_default()
+    }
 }

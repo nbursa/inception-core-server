@@ -34,6 +34,16 @@ impl BaseAgent {
             }
         }
 
+        if let Some(rest) = trimmed.strip_prefix("if context includes ") {
+            let keyword = rest.trim();
+            for (_k, val) in self.context.all() {
+                if val.contains(keyword) {
+                    return Some(format!("Context includes '{}'", keyword));
+                }
+            }
+            return Some(format!("Context does not include '{}'", keyword));
+        }
+
         None
     }
 }
