@@ -16,3 +16,6 @@ sqlx = { version = "0.7", features = ["sqlite", "runtime-tokio-rustls"] }
 jsonwebtoken = "9"
 thiserror = "1"
 dotenvy = "0.15"
+anyhow = "1.0"
+rand = "0.8"
+llama_cpp_rs = "0.3"

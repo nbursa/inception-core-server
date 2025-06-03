@@ -4,5 +4,5 @@ memory.db
 /backups/
 .chroma
 .DS_Store
-/models/*
+/models/
 /llama.cpp/

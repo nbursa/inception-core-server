@@ -8,3 +8,19 @@ services:
       - ANONYMIZED_TELEMETRY=FALSE
     volumes:
       - /tmp/chroma:/tmp/chroma
+
+  llm:
+    build:
+      context: ./llama.cpp
+      dockerfile: Dockerfile.server
+    container_name: llama-server
+    command: >
+      --model /models/mistral-7b-q4.gguf
+      --port 11434
+      --ctx-size 256
+      --threads 1
+    volumes:
+      - ./models:/models
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
