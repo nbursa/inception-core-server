@@ -1,5 +1,5 @@
 use crate::agents::sentience_wrapper::SentienceWrapper;
-use crate::ICORE::context::Context;
+use crate::icore::context::Context;
 use std::sync::Mutex;
 
 pub struct BaseAgent {

@@ -1,5 +1,5 @@
-use crate::ICORE::llm;
-use crate::ICORE::protocol::ICOREError;
+use crate::icore::llm;
+use crate::icore::protocol::ICOREError;
 
 pub async fn generate(prompt: &str) -> Result<String, ICOREError> {
     if prompt.trim().is_empty() {

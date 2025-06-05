@@ -14,7 +14,7 @@ use crate::memory::short_term::ShortTermMemory;
 mod agents;
 mod api;
 mod config;
-mod ICORE;
+mod icore;
 pub mod memory;
 
 #[tokio::main]

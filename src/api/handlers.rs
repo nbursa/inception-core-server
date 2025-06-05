@@ -1,5 +1,5 @@
 use crate::agents::AGENT;
-use crate::ICORE::model;
+use crate::icore::model;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
