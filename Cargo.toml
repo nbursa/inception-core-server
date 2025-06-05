@@ -2,6 +2,8 @@
 name = "inception-mcp-server"
 version = "0.1.0"
 edition = "2024"
+license = "Proprietary"
+license-file = "LICENSE"
 
 [dependencies]
 axum = { version = "0.7", features = ["http1", "json", "macros"] }

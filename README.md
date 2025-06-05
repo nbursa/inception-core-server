@@ -1,7 +1,15 @@
 # Inception MCP Server
 
+![Status: WIP](https://img.shields.io/badge/status-WIP-orange)
+![License: Non-Commercial](https://img.shields.io/badge/license-Proprietary%20NC-blue)
+![Language: Rust](https://img.shields.io/badge/language-Rust-orange)
+![Dockerized](https://img.shields.io/badge/docker-ready-blue)
+![Build](https://img.shields.io/badge/build-manual-lightgrey)
+
 > **Multi‐Component Processing (MCP) Server**  
 > A modular, extensible Rust-based server providing short-term, long-term, and latent memory services, a chat endpoint backed by a BaseAgent + Sentience DSL, and seamless integration with ChromaDB and LLM services.
+
+> ⚠️ **Work In Progress**: This project is under active development. Interfaces, APIs, and internal structure may change frequently.
 
 ---
 
@@ -926,6 +934,8 @@ Please ensure all CI checks (formatting, linting, tests) pass before requesting 
 ---
 
 ## License
+
+⚠️ **Note**: This project is still in an experimental phase and is not guaranteed to be stable or production-ready.
 
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
