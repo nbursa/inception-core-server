@@ -6,3 +6,4 @@ memory.db
 .DS_Store
 /models/
 /llama.cpp/
+llama_server.txt
