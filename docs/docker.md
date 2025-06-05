@@ -1,15 +1,15 @@
-# 🐳 Docker Setup for Inception MCP Server
+# Docker Setup for Inception MCP Server
 
 This project supports two Docker modes optimized for different workflows:
 
 ---
 
-## 🟢 Development Mode (`docker-compose.dev.yml`)
+## Development Mode (`docker-compose.dev.yml`)
 
 Minimal setup — runs only ChromaDB in Docker.  
 You run MCP server locally via `cargo run`.
 
-### 🔧 Setup
+### Setup
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
@@ -21,7 +21,7 @@ Then, in another terminal:
 cargo run
 ```
 
-### 🧠 Why use this?
+### Why use this?
 
 - Less CPU/RAM usage (ideal for low-power machines)
 - Fast rebuilds, instant feedback
@@ -29,18 +29,18 @@ cargo run
 
 ---
 
-## 🔵 Production Mode (`docker-compose.prod.yml`)
+## Production Mode (`docker-compose.prod.yml`)
 
 Runs both MCP server and ChromaDB inside Docker containers.
 Use this for end-to-end testing or deployment.
 
-### 🔧 Setup
+### Setup
 
 ```bash
 docker compose -f docker-compose.prod.yml up --build
 ```
 
-### 🧠 Why use this?
+### Why use this?
 
 - Reproducible, portable environment
 - No need for local Rust/toolchain setup
@@ -48,14 +48,14 @@ docker compose -f docker-compose.prod.yml up --build
 
 ---
 
-## 🔁 Switching Modes
+## Switching Modes
 
 - For everyday dev: use **dev mode**
 - For integration tests or demo builds: use **prod mode**
 
 ---
 
-## 📁 File Overview
+## File Overview
 
 ```
 docker-compose.dev.yml      # Lightweight ChromaDB only
@@ -65,7 +65,7 @@ Dockerfile                  # Rust MCP server build definition
 
 ---
 
-## 📝 Notes
+## Notes
 
 - `.env` must contain `CHROMADB_URL=http://localhost:8000`
 - Persistent ChromaDB storage is mapped to `./chromadb/`

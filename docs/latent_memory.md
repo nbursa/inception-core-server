@@ -1,19 +1,19 @@
-# 🧠 Latent Memory (ChromaDB v0.6.3 Integration)
+# Latent Memory (ChromaDB v0.6.3 Integration)
 
 This document outlines the current implementation of the Latent Memory system in the `inception-mcp-server` project, based on integration with **ChromaDB v0.6.3** using REST API v2.
 
 ---
 
-## ✅ Status
+## Status
 
-- ✅ **ChromaDB** running via Docker (version `0.6.3`)
-- ✅ `latent.rs` implements manual vector embedding and search
-- ✅ `/api/mem/latent/embed` stores vectorized entries
-- ✅ `/api/mem/latent/query` performs similarity search over embeddings
+- **ChromaDB** running via Docker (version `0.6.3`)
+- `latent.rs` implements manual vector embedding and search
+- `/api/mem/latent/embed` stores vectorized entries
+- `/api/mem/latent/query` performs similarity search over embeddings
 
 ---
 
-## 🔧 Setup
+## Setup
 
 ### Docker Service
 
@@ -39,7 +39,7 @@ docker compose -f docker-compose.dev.yml up -d chromadb
 
 ---
 
-## 🧬 Collection
+## Collection
 
 Collection must be created manually via:
 
@@ -57,7 +57,7 @@ Store the returned UUID and hardcode it in `latent.rs` (temporary workaround).
 
 ---
 
-## 📥 Embed
+## Embed
 
 ```bash
 curl -X POST http://localhost:8080/api/mem/latent/embed \
@@ -69,7 +69,7 @@ This uses a dummy 1536-dim vector (all zeros). Replace with real embeddings late
 
 ---
 
-## 🔍 Query
+## Query
 
 ```bash
 curl -X POST http://localhost:8080/api/mem/latent/query \
@@ -81,7 +81,7 @@ Returns most similar IDs.
 
 ---
 
-## 🧼 Cleanup
+## Cleanup
 
 To reset:
 
@@ -91,7 +91,7 @@ docker compose -f docker-compose.dev.yml down -v
 
 ---
 
-## 🧠 Next
+## Next
 
 - Replace dummy vectors with actual embedding generator (OpenAI or local)
 - Use `.env` for dynamic collection UUID injection

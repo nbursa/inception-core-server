@@ -2,18 +2,31 @@ version: "3.9"
 
 services:
   mcp:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: inception-mcp-server:latest
+    container_name: mcp-server
     ports:
       - "8080:8080"
     environment:
       - MCP_ENV=production
+      - RUST_LOG=info
       - DATABASE_URL=sqlite:memory.db
       - CHROMADB_URL=http://chromadb:8000
+      - CHROMA_COLLECTION_ID=${CHROMA_COLLECTION_ID}
+      - LLM_URL=http://llm:11434
+    volumes:
+      - ./agent.sent:/usr/src/app/agent.sent
+      - ./memory.db:/usr/src/app/memory.db
     depends_on:
       - chromadb
+      - llm
+    restart: unless-stopped
 
   chromadb:
     image: chromadb/chroma:0.6.3
+    container_name: chromadb
     ports:
       - "8000:8000"
     volumes:
@@ -22,3 +35,21 @@ services:
       - IS_PERSISTENT=TRUE
       - PERSIST_DIRECTORY=/chroma/chroma
       - ANONYMIZED_TELEMETRY=TRUE
+    restart: unless-stopped
+
+  llm:
+    build:
+      context: ./llama.cpp
+      dockerfile: Dockerfile.server
+    image: llama-server:latest
+    container_name: llama-server
+    command: >
+      --model /models/mistral-7b-q4.gguf
+      --port 11434
+      --ctx-size 256
+      --threads 1
+    volumes:
+      - ./models:/models
+    ports:
+      - "11434:11434"
+    restart: unless-stopped

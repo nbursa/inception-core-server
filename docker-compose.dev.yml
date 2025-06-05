@@ -32,11 +32,13 @@ services:
     depends_on:
       - chromadb
       - llm
+    env_file:
+      - .env
     environment:
       - RUST_LOG=info
       - MCP_ENV=development
       - CHROMADB_URL=http://chromadb:8000
-      - CHROMA_COLLECTION_ID=1414cedf-3081-4235-ab29-656549bdff1a
+      - CHROMA_COLLECTION_ID=${CHROMA_COLLECTION_ID}
       - LLM_URL=http://llm:11434
     ports:
       - "8080:8080"

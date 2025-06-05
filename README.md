@@ -827,6 +827,7 @@ inception-mcp-server/
 ├── Cargo.toml
 ├── Dockerfile
 ├── docker-compose.dev.yml
+├── docker-compose.prod.yml
 ├── README.md
 ├── agent.sent            # (optional) Sentience DSL script
 ├── memory.db             # SQLite database (auto-created on first run)
@@ -937,6 +938,8 @@ Please ensure all CI checks (formatting, linting, tests) pass before requesting 
 
 ⚠️ **Note**: This project is still in an experimental phase and is not guaranteed to be stable or production-ready.
 
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+This project is licensed under a **Proprietary Non-Commercial License**.  
+It is free to use for research, education, and experimentation, but **commercial use is strictly prohibited without written permission**.  
+See [LICENSE](LICENSE) for full terms.
 
 ---
