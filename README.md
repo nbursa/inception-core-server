@@ -6,7 +6,7 @@
 ![Dockerized](https://img.shields.io/badge/docker-ready-blue)
 ![Build](https://img.shields.io/badge/build-manual-lightgrey)
 
-> **Multi‐Component Processing (MCP) Server**  
+> **Model–Context–Protocol (MCP) Server**  
 > A modular, extensible Rust-based server providing short-term, long-term, and latent memory services, a chat endpoint backed by a BaseAgent + Sentience DSL, and seamless integration with ChromaDB and LLM services.
 
 > ⚠️ **Work In Progress**: This project is under active development. Interfaces, APIs, and internal structure may change frequently.
