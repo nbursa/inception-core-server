@@ -62,6 +62,8 @@
 
 This README will guide you through architecture details, setup instructions, environment configuration, API usage, and development workflows.
 
+> See [VISION.md](./VISION.md) for the philosophical motivation and long-term intent behind this project.
+
 ---
 
 ## Features
@@ -100,6 +102,26 @@ This README will guide you through architecture details, setup instructions, env
 ---
 
 ## Architecture & Components
+
+### Architecture as Brain
+
+The inception-mcp-server acts as the brain stem of an artificial intelligence system — responsible for coordination, memory routing, and protocol-level reflexes.
+
+Its structure is inspired by the biological brain:
+
+- **Inception (this server)** — _Brain stem_
+  Manages memory access, agent execution, and DSL processing. It doesn't "think" — it regulates.
+
+- **Cortex (Memory layers)** — _Cognitive cortex_  
+  Stores long-term knowledge (SQLite), short-term working memory (in-memory), and latent semantic space (ChromaDB).
+
+- **Agents** — _Organs_  
+  Input/output entities that perceive, act, and reflect using structured memory and embedded logic.
+
+- **MCP Protocol** — _Neural signals_  
+  A standardized communication flow between memory, agents, and logic evaluators.
+
+This separation enables modular development, autonomous behavior, and semantic reflection — one layer at a time.
 
 Below is a high-level architecture diagram and description of each core component and how they interact:
 
