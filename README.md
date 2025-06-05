@@ -103,44 +103,7 @@ This README will guide you through architecture details, setup instructions, env
 
 Below is a high-level architecture diagram and description of each core component and how they interact:
 
-```
-┌───────────────┐       ┌───────────────────┐
-│ Client /      │──────▶│ HTTP API          │
-│ Frontend      │       │ (Axum Endpoints)  │
-└───────────────┘       └───────────────────┘
-                              │
-                              ▼
-                      ┌───────────────────┐
-                      │ Handlers          │
-                      │ (handlers.rs)     │
-                      └───────────────────┘
-                       ┌────┼────┐
-                       │    │    │
-              ┌────────▼─┐  │  ┌─▼───────────────┐
-              │ Short-   │   │  │ Latent Memory    │
-              │ Term     │   │  │ (ChromaDB client │
-              │ Memory    │  │  │  latent.rs)      │
-              │ (in-mem) │   │  └──────────────--──┘
-              └──────────┘   │
-                    ▲       │
-   seed/flush        │       │ embed / query
-                     │       │
-               ┌─────┴───────┴────-─┐
-               │ BaseAgent /        │
-               │ Sentience DSL      │
-               │ (agent.rs &        │
-               │  sentience_wrapper)│
-               └─────┬─────────────┘
-                     │
-                     |
-                     ▼
-                ┌───────────────┐
-                │ Long-Term     │
-                │ Memory        │
-                │ (SQLite via   │
-                │  sqlx)        │
-                └───────────────┘
-```
+![Inception MCP Architecture](./docs/images/inception-graph.png)
 
 ### BaseAgent & Sentience DSL
 
