@@ -220,6 +220,16 @@ You can verify that the project builds locally:
 cargo build
 ```
 
+### Clone Sentience Dependency
+
+This project depends on a local Rust crate named [`sentience`](https://github.com/nbursa/sentience).
+
+Clone it into the **same parent directory** as this project:
+
+```bash
+git clone https://github.com/nbursa/sentience.git
+```
+
 ---
 
 ### Environment Variables
