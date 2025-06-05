@@ -1,6 +1,6 @@
-# ChromaDB Setup & Usage (for Inception MCP Server)
+# ChromaDB Setup & Usage (for Inception ICORE Server)
 
-ChromaDB is used for latent (vector-based) memory in the Inception MCP system.  
+ChromaDB is used for latent (vector-based) memory in the Inception ICORE system.  
 It provides fast similarity search over embedded representations.
 
 ---

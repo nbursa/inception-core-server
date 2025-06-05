@@ -1,4 +1,4 @@
-# Inception MCP Server
+# Inception ICORE Server
 
 ![Status: WIP](https://img.shields.io/badge/status-WIP-orange)
 ![License: Non-Commercial](https://img.shields.io/badge/license-Proprietary%20NC-blue)
@@ -6,7 +6,7 @@
 ![Dockerized](https://img.shields.io/badge/docker-ready-blue)
 ![Build](https://img.shields.io/badge/build-manual-lightgrey)
 
-> **Model–Context–Protocol (MCP) Server**  
+> **Model–Context–Protocol (ICORE) Server**  
 > A modular, extensible Rust-based server providing short-term, long-term, and latent memory services, a chat endpoint backed by a BaseAgent + Sentience DSL, and seamless integration with ChromaDB and LLM services.
 
 > ⚠️ **Work In Progress**: This project is under active development. Interfaces, APIs, and internal structure may change frequently.
@@ -51,7 +51,7 @@
 
 ## Overview
 
-**Inception MCP Server** is designed as a highly flexible microservice that facilitates:
+**Inception ICORE Server** is designed as a highly flexible microservice that facilitates:
 
 - **Short-Term Memory** for transient key-value storage (in-memory).
 - **Long-Term Memory** for persistent key-value storage (SQLite).
@@ -90,7 +90,7 @@ This README will guide you through architecture details, setup instructions, env
 
 - **Docker Compose Setup**
 
-  - Preconfigured `docker-compose.dev.yml` to orchestrate ChromaDB, a local LLM service, and the MCP Server.
+  - Preconfigured `docker-compose.dev.yml` to orchestrate ChromaDB, a local LLM service, and the ICORE Server.
 
 - **Asynchronous**
 
@@ -105,7 +105,7 @@ This README will guide you through architecture details, setup instructions, env
 
 ### Architecture as Brain
 
-The inception-mcp-server acts as the brain stem of an artificial intelligence system — responsible for coordination, memory routing, and protocol-level reflexes.
+The inception-ICORE-server acts as the brain stem of an artificial intelligence system — responsible for coordination, memory routing, and protocol-level reflexes.
 
 Its structure is inspired by the biological brain:
 
@@ -118,14 +118,14 @@ Its structure is inspired by the biological brain:
 - **Agents** — _Organs_  
   Input/output entities that perceive, act, and reflect using structured memory and embedded logic.
 
-- **MCP Protocol** — _Neural signals_  
+- **ICORE Protocol** — _Neural signals_  
   A standardized communication flow between memory, agents, and logic evaluators.
 
 This separation enables modular development, autonomous behavior, and semantic reflection — one layer at a time.
 
 Below is a high-level architecture diagram and description of each core component and how they interact:
 
-![Inception MCP Architecture](./docs/images/inception-graph.png)
+![Inception ICORE Architecture](./docs/images/inception-graph.png)
 
 ### BaseAgent & Sentience DSL
 
@@ -203,15 +203,15 @@ which sends an HTTP request to `LLM_URL` with JSON `{ "prompt": "..."} ` and ret
 
    - **ChromaDB**: `8000`
    - **LLM Server**: `11434`
-   - **MCP Server**: `8080`
+   - **ICORE Server**: `8080`
 
 ---
 
 ### Clone & Build
 
 ```bash
-git clone https://github.com/your-org/inception-mcp-server.git
-cd inception-mcp-server
+git clone https://github.com/your-org/inception-ICORE-server.git
+cd inception-ICORE-server
 ```
 
 You can verify that the project builds locally:
@@ -241,7 +241,7 @@ Create a `.env` file in project root or export the following in your shell:
 CHROMADB_URL=http://localhost:8000
 CHROMA_COLLECTION_ID=<your-collection-uuid>
 LLM_URL=http://localhost:11434
-MCP_ENV=development         # or "production"
+ICORE_ENV=development         # or "production"
 RUST_LOG=info               # e.g. "debug", "info", "warn", etc.
 
 # For Docker Compose (network aliases):
@@ -258,7 +258,7 @@ RUST_LOG=info               # e.g. "debug", "info", "warn", etc.
 - `LLM_URL`
   Base URL of your LLM service (e.g., local llama.cpp server on `:11434`).
 
-- `MCP_ENV`
+- `ICORE_ENV`
   Controls environment mode (`development` or `production`). Affects logging levels, etc.
 
 - `RUST_LOG`
@@ -272,7 +272,7 @@ A ready-made `docker-compose.dev.yml` orchestrates:
 
 - **chromadb** service
 - **llm** (local Llama server)
-- **mcp-server** (this Rust application)
+- **ICORE-server** (this Rust application)
 
 1. Ensure you have a valid `CHROMA_COLLECTION_ID`. If not, you must create a collection in ChromaDB first (via its HTTP API or UI).
 
@@ -286,7 +286,7 @@ A ready-made `docker-compose.dev.yml` orchestrates:
 
    - Pull/build the `chromadb/chroma:0.6.3` image and expose port `8000`.
    - Build the local LLM container (`Dockerfile.server` in `llama.cpp/`) and expose port `11434`.
-   - Build the MCP Server container (`Dockerfile` in project root) and expose port `8080`.
+   - Build the ICORE Server container (`Dockerfile` in project root) and expose port `8080`.
 
 3. Verify all services are healthy:
 
@@ -294,7 +294,7 @@ A ready-made `docker-compose.dev.yml` orchestrates:
    docker-compose -f docker-compose.dev.yml ps
    ```
 
-4. Test the MCP server:
+4. Test the ICORE server:
 
    ```bash
    curl -i http://localhost:8080/api/ping
@@ -345,11 +345,11 @@ If you prefer to run everything natively:
    CHROMADB_URL=http://localhost:8000
    CHROMA_COLLECTION_ID=<your-collection-uuid>
    LLM_URL=http://localhost:11434
-   MCP_ENV=development
+   ICORE_ENV=development
    RUST_LOG=info
    ```
 
-4. **Run MCP Server**
+4. **Run ICORE Server**
 
    ```bash
    cargo run
@@ -372,7 +372,7 @@ If you prefer to run everything natively:
 ```bash
 curl -i http://localhost:8080/health
 # 200 OK
-# Body: MCP server is healthy.
+# Body: ICORE server is healthy.
 ```
 
 **Ping**
@@ -461,7 +461,7 @@ curl -i -X POST http://localhost:8080/api/sentience/run \
 | `CHROMADB_URL`         | URL of ChromaDB HTTP API (e.g., `http://localhost:8000`).                                       | `http://localhost:8000`                |
 | `CHROMA_COLLECTION_ID` | UUID of the ChromaDB collection for storing/querying embeddings. Must exist beforehand.         | `1414cedf-3081-4235-ab29-656549bdff1a` |
 | `LLM_URL`              | Base URL for the LLM service (used for fallback text generation).                               | `http://localhost:11434`               |
-| `MCP_ENV`              | Environment mode (`development` or `production`). Controls logging/filtering and optimizations. | `development`                          |
+| `ICORE_ENV`            | Environment mode (`development` or `production`). Controls logging/filtering and optimizations. | `development`                          |
 | `RUST_LOG`             | Logging filter for [`tracing_subscriber`](https://docs.rs/tracing-subscriber). (e.g. `info`).   | `info`                                 |
 | `DATABASE_URL`         | (Optional) SQLite file path for long-term memory (used by `sqlx`). Defaults to `memory.db`.     | `memory.db`                            |
 | `AGENT_SENT_FILE`      | (Optional) Path to a Sentience DSL script (defaults to `agent.sent` in project root).           | `./agent.sent`                         |
@@ -486,7 +486,7 @@ GET /health
 - **Response**
 
   - `200 OK`
-  - Body: plain text `"MCP server is healthy."`
+  - Body: plain text `"ICORE server is healthy."`
 
 ### 2. Short-Term Memory Endpoints
 
@@ -818,7 +818,7 @@ Content-Type: application/json
 ## Directory Structure
 
 ```
-inception-mcp-server/
+inception-ICORE-server/
 ├── Cargo.toml
 ├── Dockerfile
 ├── docker-compose.dev.yml
@@ -843,10 +843,10 @@ inception-mcp-server/
 │   │   ├── long_term.rs  # SQLite-backed key-value store
 │   │   ├── latent.rs     # ChromaDB client for embeddings & queries
 │   │   └── mod.rs
-│   ├── mcp/
+│   ├── ICORE/
 │   │   ├── model.rs      # LLM HTTP client & `generate(prompt)` function
 │   │   └── context.rs    # Context for BaseAgent (“remember/recall/if context includes”)
-│   │   └── protocol.rs   # MCP protocol definitions (errors, etc.)
+│   │   └── protocol.rs   # ICORE protocol definitions (errors, etc.)
 │   │   └── mod.rs
 │   ├── config.rs?        # top-level config module for env/settings
 │   └── ...               # other modules (utilities, etc.)

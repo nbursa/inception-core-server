@@ -1,4 +1,4 @@
-# Docker Setup for Inception MCP Server
+# Docker Setup for Inception ICORE Server
 
 This project supports two Docker modes optimized for different workflows:
 
@@ -7,7 +7,7 @@ This project supports two Docker modes optimized for different workflows:
 ## Development Mode (`docker-compose.dev.yml`)
 
 Minimal setup — runs only ChromaDB in Docker.  
-You run MCP server locally via `cargo run`.
+You run ICORE server locally via `cargo run`.
 
 ### Setup
 
@@ -31,7 +31,7 @@ cargo run
 
 ## Production Mode (`docker-compose.prod.yml`)
 
-Runs both MCP server and ChromaDB inside Docker containers.
+Runs both ICORE server and ChromaDB inside Docker containers.
 Use this for end-to-end testing or deployment.
 
 ### Setup
@@ -59,8 +59,8 @@ docker compose -f docker-compose.prod.yml up --build
 
 ```
 docker-compose.dev.yml      # Lightweight ChromaDB only
-docker-compose.prod.yml     # Full stack: MCP + ChromaDB
-Dockerfile                  # Rust MCP server build definition
+docker-compose.prod.yml     # Full stack: ICORE + ChromaDB
+Dockerfile                  # Rust ICORE server build definition
 ```
 
 ---
@@ -69,6 +69,6 @@ Dockerfile                  # Rust MCP server build definition
 
 - `.env` must contain `CHROMADB_URL=http://localhost:8000`
 - Persistent ChromaDB storage is mapped to `./chromadb/`
-- MCP server listens on port `8080`, ChromaDB on `8000`
+- ICORE server listens on port `8080`, ChromaDB on `8000`
 
 ---

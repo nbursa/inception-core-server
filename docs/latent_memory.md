@@ -1,6 +1,6 @@
 # Latent Memory (ChromaDB v0.6.3 Integration)
 
-This document outlines the current implementation of the Latent Memory system in the `inception-mcp-server` project, based on integration with **ChromaDB v0.6.3** using REST API v2.
+This document outlines the current implementation of the Latent Memory system in the `inception-ICORE-server` project, based on integration with **ChromaDB v0.6.3** using REST API v2.
 
 ---
 

@@ -14,7 +14,7 @@ use crate::memory::short_term::ShortTermMemory;
 mod agents;
 mod api;
 mod config;
-mod mcp;
+mod ICORE;
 pub mod memory;
 
 #[tokio::main]
@@ -23,7 +23,7 @@ async fn main() {
     fmt().with_env_filter(EnvFilter::from_default_env()).init();
 
     let settings = config::settings::Settings::new();
-    tracing::info!("Starting MCP server in {} mode", settings.env);
+    tracing::info!("Starting ICORE server in {} mode", settings.env);
 
     SHORT_MEM.set(ShortTermMemory::new()).unwrap();
     LONG_MEM
@@ -61,5 +61,5 @@ async fn main() {
 }
 
 async fn health_check() -> &'static str {
-    "MCP server is healthy."
+    "ICORE server is healthy."
 }

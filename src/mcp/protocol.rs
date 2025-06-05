@@ -2,7 +2,7 @@ use sqlx::Error as SqlxError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum MCPError {
+pub enum ICOREError {
     #[error("Database error: {0}")]
     Database(#[from] SqlxError),
 

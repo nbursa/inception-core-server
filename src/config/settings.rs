@@ -10,7 +10,7 @@ pub struct Settings {
 impl Settings {
     pub fn new() -> Self {
         Self {
-            env: env::var("MCP_ENV").unwrap_or_else(|_| "development".into()),
+            env: env::var("ICORE_ENV").unwrap_or_else(|_| "development".into()),
             chromadb_url: env::var("CHROMADB_URL").expect("CHROMADB_URL is not set"),
         }
     }
