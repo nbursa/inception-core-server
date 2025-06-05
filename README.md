@@ -1,17 +1,3 @@
-<!-- docker compose -f docker-compose.dev.yml up -d -->
-
-<!-- docker compose -f docker-compose.dev.yml up --build -d -->
-
-# llm server
-
-```bash
-llama.cpp/build/bin/llama-server \
- --model models/mistral-7b-q4.gguf \
- --ctx-size 128 \
- --threads 1 \
- --port 11434
-```
-
 # Inception MCP Server
 
 > **Multi‐Component Processing (MCP) Server**  
@@ -944,7 +930,3 @@ Please ensure all CI checks (formatting, linting, tests) pass before requesting 
 This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
 ---
-
-```
-
-```
