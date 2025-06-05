@@ -60,4 +60,18 @@ impl LongTermMemory {
             .await
             .ok();
     }
+
+    pub async fn all(&self) -> Vec<(String, String)> {
+        let rows = sqlx::query("SELECT key, value FROM memories")
+            .fetch_all(&self.pool)
+            .await
+            .unwrap_or_default();
+        rows.into_iter()
+            .map(|row| {
+                let key: String = row.get("key");
+                let value: String = row.get("value");
+                (key, value)
+            })
+            .collect()
+    }
 }

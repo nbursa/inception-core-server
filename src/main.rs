@@ -1,13 +1,15 @@
 use axum::{Router, routing::get, serve};
+use std::fs;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing_subscriber::{EnvFilter, fmt};
 
-use crate::agents::{AGENT, agent::BaseAgent};
-use crate::api::handlers::{LATENT_MEM, LONG_MEM};
-use crate::mcp::context::Context;
+use crate::agents::{AGENT, BaseAgent};
+use crate::api::handlers::{LATENT_MEM, LONG_MEM, SHORT_MEM};
+use crate::api::routes::routes;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
+use crate::memory::short_term::ShortTermMemory;
 
 mod agents;
 mod api;
@@ -18,34 +20,39 @@ pub mod memory;
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
-
     fmt().with_env_filter(EnvFilter::from_default_env()).init();
 
     let settings = config::settings::Settings::new();
     tracing::info!("Starting MCP server in {} mode", settings.env);
 
-    let long = LongTermMemory::new("memory.db").await;
-    let latent = LatentMemory::new(settings.chromadb_url.clone()).await;
+    SHORT_MEM.set(ShortTermMemory::new()).unwrap();
+    LONG_MEM
+        .set(LongTermMemory::new("memory.db").await)
+        .unwrap();
+    LATENT_MEM
+        .set(LatentMemory::new(settings.chromadb_url.clone()).await)
+        .unwrap();
 
-    LONG_MEM.set(long).unwrap();
-    LATENT_MEM.set(latent).unwrap();
+    let mut base_agent = BaseAgent::new();
+    match fs::read_to_string("agent.sent") {
+        Ok(sent_code) => {
+            base_agent
+                .load_sentience(&sent_code)
+                .expect("Sentience load failed");
+            println!("Loaded Sentience DSL from agent.sent");
+        }
+        Err(_) => {
+            println!("Warning: 'agent.sent' not found, running w/o Sentience DSL");
+        }
+    }
 
-    let agent = BaseAgent::new();
-    AGENT.set(agent).unwrap();
-
-    // Context test
-    let ctx = Context::new();
-    ctx.set("mood", "curious");
-
-    if let Some(value) = ctx.get("mood") {
-        println!("Context test passed: mood = {}", value);
-    } else {
-        println!("Context test failed");
+    if AGENT.set(base_agent).is_err() {
+        panic!("AGENT was already set");
     }
 
     let app = Router::new()
         .route("/health", get(health_check))
-        .nest("/api", api::routes::routes());
+        .nest("/api", routes());
 
     let addr: SocketAddr = "0.0.0.0:8080".parse().unwrap();
     let listener = TcpListener::bind(addr).await.unwrap();

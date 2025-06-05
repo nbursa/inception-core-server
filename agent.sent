@@ -1,0 +1,7 @@
+agent Echo {
+  mem short
+  goal: "Echo agent"
+  on input(msg) {
+    mem.short["response"] = format!("Echo: {}", msg)
+  }
+}

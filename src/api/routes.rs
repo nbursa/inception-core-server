@@ -1,5 +1,4 @@
-use super::handlers;
-use crate::api::handlers::chat;
+use crate::api::handlers;
 use axum::{
     Router,
     routing::{get, post},
@@ -14,5 +13,6 @@ pub fn routes() -> Router {
         .route("/mem/long/:key", post(handlers::set_long_mem))
         .route("/mem/latent/embed", post(handlers::embed_latent))
         .route("/mem/latent/query", post(handlers::query_latent))
-        .route("/chat", post(chat))
+        .route("/chat", post(handlers::chat))
+        .route("/sentience/run", post(handlers::sentience_run_handler))
 }

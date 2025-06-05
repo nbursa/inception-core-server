@@ -6,7 +6,5 @@ pub async fn generate(prompt: &str) -> Result<String, MCPError> {
         return Err(MCPError::InvalidInput("prompt is empty".into()));
     }
 
-    llm::generate_local(prompt)
-        .await
-        .map_err(|e| MCPError::Model(e.to_string()))
+    llm::generate_local(prompt).map_err(|e| MCPError::Model(e.to_string()))
 }

@@ -1,6 +1,7 @@
 pub mod agent;
+pub mod sentience_wrapper;
 
-use crate::agents::agent::BaseAgent;
-use std::sync::OnceLock;
+pub use agent::BaseAgent;
+use once_cell::sync::OnceCell;
 
-pub static AGENT: OnceLock<BaseAgent> = OnceLock::new();
+pub static AGENT: OnceCell<BaseAgent> = OnceCell::new();

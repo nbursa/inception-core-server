@@ -1,19 +1,39 @@
+use crate::agents::sentience_wrapper::SentienceWrapper;
 use crate::mcp::context::Context;
+use std::sync::Mutex;
 
-#[derive(Debug)]
 pub struct BaseAgent {
     context: Context,
+    sentience: Option<Mutex<SentienceWrapper>>,
 }
 
 impl BaseAgent {
     pub fn new() -> Self {
         BaseAgent {
             context: Context::new(),
+            sentience: None,
         }
+    }
+
+    pub fn load_sentience(&mut self, code: &str) -> Result<(), String> {
+        let mut wrapper = SentienceWrapper::new();
+        wrapper.load_program(code)?;
+        self.sentience = Some(Mutex::new(wrapper));
+        Ok(())
     }
 
     pub async fn handle(&self, input: &str) -> Option<String> {
         let trimmed = input.trim();
+
+        if let Some(wrapper_mutex) = &self.sentience {
+            let mut guard = wrapper_mutex.lock().unwrap();
+            let code = format!("on input({}) {{ }}", trimmed);
+            let _ = guard.handle_code(&code);
+            let resp = guard.inner.get_short("response");
+            if !resp.is_empty() {
+                return Some(resp);
+            }
+        }
 
         if let Some(rest) = trimmed.strip_prefix("remember ") {
             let parts: Vec<&str> = rest.splitn(2, '=').collect();

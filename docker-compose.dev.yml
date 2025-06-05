@@ -24,3 +24,24 @@ services:
     ports:
       - "11434:11434"
     restart: unless-stopped
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - chromadb
+      - llm
+    environment:
+      - RUST_LOG=info
+      - MCP_ENV=development
+      - CHROMADB_URL=http://chromadb:8000
+      - CHROMA_COLLECTION_ID=1414cedf-3081-4235-ab29-656549bdff1a
+      - LLM_URL=http://llm:11434
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./agent.sent:/usr/src/app/agent.sent
+      - ./memory.db:/usr/src/app/memory.db
+    command: >
+      sh -c "cargo run --release"
