@@ -27,7 +27,7 @@ async fn main() {
 
     SHORT_MEM.set(ShortTermMemory::new()).unwrap();
     LONG_MEM
-        .set(LongTermMemory::new("memory.db").await)
+        .set(LongTermMemory::new(&settings.database_url).await)
         .unwrap();
     LATENT_MEM
         .set(LatentMemory::new(settings.chromadb_url.clone()).await)
