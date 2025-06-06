@@ -1733,6 +1733,7 @@ dependencies = [
 [[package]]
 name = "sentience"
 version = "0.1.1"
+source = "git+https://github.com/nbursa/sentience?branch=main#373518189ffb0f7c35124cd64c4d0b15f82e1b8f"
 dependencies = [
  "atty",
  "serde",
