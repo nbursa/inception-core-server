@@ -44,7 +44,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_sentience_basic() {
-        let mut context = Context::new();
+        let mut context = Context {
+            mem_short: ShortTermMemory::new(),
+            mem_long: LongTermMemory::new(),
+            mem_latent: LatentMemory::new("dummy-collection-id"),
+        };
 
         let mut agent = SentienceAgent::new();
         let code = r#"
