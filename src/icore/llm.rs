@@ -1,8 +1,8 @@
+use std::env;
+
 use anyhow::{Result, anyhow};
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
-
-const LLM_ENDPOINT: &str = "http://127.0.0.1:11434/completion";
 
 #[derive(Serialize)]
 struct LlamaRequest<'a> {
@@ -24,13 +24,15 @@ pub fn generate_local(prompt: &str) -> Result<String> {
 
     let req = LlamaRequest {
         prompt,
-        n_predict: 256,
+        n_predict: 128,
         stream: false,
     };
 
+    let url = env::var("LLM_URL").map_err(|_| anyhow!("LLM_URL not set"))?;
+
     let cli = Client::new();
     let res = cli
-        .post(LLM_ENDPOINT)
+        .post(&url)
         .json(&req)
         .send()
         .map_err(|e| anyhow!("HTTP error: {}", e))?

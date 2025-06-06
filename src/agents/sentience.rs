@@ -1,4 +1,4 @@
-use crate::mcp::context::Context;
+use crate::icore::context::Context;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
@@ -37,7 +37,7 @@ impl SentienceAgent {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mcp::context::Context;
+    use crate::icore::context::Context;
     use crate::memory::latent::LatentMemory;
     use crate::memory::long_term::LongTermMemory;
     use crate::memory::short_term::ShortTermMemory;
