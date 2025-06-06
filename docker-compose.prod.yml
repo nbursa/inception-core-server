@@ -1,12 +1,12 @@
 version: "3.9"
 
 services:
-  ICORE:
+  icore:
     build:
       context: .
       dockerfile: Dockerfile
-    image: inception-ICORE-server:latest
-    container_name: ICORE-server
+    image: inception-icore-server:latest
+    container_name: icore-server
     ports:
       - "8080:8080"
     environment:

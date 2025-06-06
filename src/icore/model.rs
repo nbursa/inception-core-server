@@ -1,10 +1,10 @@
 use crate::icore::llm;
-use crate::icore::protocol::ICOREError;
+use crate::icore::protocol::IcoreError;
 
-pub async fn generate(prompt: &str) -> Result<String, ICOREError> {
+pub async fn generate(prompt: &str) -> Result<String, IcoreError> {
     if prompt.trim().is_empty() {
-        return Err(ICOREError::InvalidInput("prompt is empty".into()));
+        return Err(IcoreError::InvalidInput("prompt is empty".into()));
     }
 
-    llm::generate_local(prompt).map_err(|e| ICOREError::Model(e.to_string()))
+    llm::generate_local(prompt).map_err(|e| IcoreError::Model(e.to_string()))
 }

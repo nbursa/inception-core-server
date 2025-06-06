@@ -25,7 +25,7 @@ services:
       - "11434:11434"
     restart: unless-stopped
 
-  ICORE-server:
+  icore-server:
     build:
       context: .
       dockerfile: Dockerfile
