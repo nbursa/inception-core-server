@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
+import { SignalIcon } from '@heroicons/vue/24/outline'
 
 const nav = [
   { path: '/', label: 'Home' },
@@ -10,6 +12,29 @@ const nav = [
 ]
 
 const env = import.meta.env.MODE
+const status = ref<'online' | 'offline' | 'loading'>('loading')
+let timeoutId: number
+
+async function checkHealth() {
+  try {
+    const res = await fetch('http://localhost:8080/health')
+    status.value = res.ok ? 'online' : 'offline'
+  } catch {
+    status.value = 'offline'
+  } finally {
+    timeoutId = window.setTimeout(() => {
+      window.requestIdleCallback(checkHealth)
+    }, 5000)
+  }
+}
+
+onMounted(() => {
+  checkHealth()
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(timeoutId)
+})
 </script>
 
 <template>
@@ -34,12 +59,23 @@ const env = import.meta.env.MODE
       <header
         class="h-14 bg-background-soft border-b border-border px-6 flex items-center justify-between"
       >
-        <div class="text-sm text-text">Env: {{ env }}</div>
-        <div class="text-sm text-green-500">Status: online</div>
+        <div class="text-sm text-text">
+          Env: <span class="capitalize text-accent">{{ env }}</span>
+        </div>
+        <div
+          class="flex items-center gap-1 text-sm font-semibold capitalize"
+          :class="{
+            'text-success': status === 'online',
+            'text-danger': status === 'offline',
+            'text-warning': status === 'loading',
+          }"
+        >
+          <SignalIcon class="size-6" /> {{ status }}
+        </div>
       </header>
 
       <main class="flex-1 overflow-y-auto p-6">
-        <slot />
+        <slot :status="status" />
       </main>
     </div>
   </div>

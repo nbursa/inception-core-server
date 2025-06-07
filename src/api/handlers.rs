@@ -23,6 +23,13 @@ async fn long_mem() -> &'static LongTermMemory {
     LONG_MEM.get_or_init(|| panic!("LongTermMemory not initialized"))
 }
 
+pub async fn get_all_short_mem() -> impl IntoResponse {
+    match mem().all() {
+        Some(map) => Json(map).into_response(),
+        None => (StatusCode::INTERNAL_SERVER_ERROR, "memory lock failed").into_response(),
+    }
+}
+
 pub async fn ping() -> &'static str {
     "pong"
 }

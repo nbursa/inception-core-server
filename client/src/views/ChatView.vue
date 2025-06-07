@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
+import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/outline'
+
+const apiUrl = import.meta.env.VITE_API_URL
 
 const prompt = ref('')
 const response = ref('')
@@ -27,7 +30,7 @@ async function send() {
   response.value = ''
 
   try {
-    const res = await fetch('http://localhost:8080/api/chat', {
+    const res = await fetch(`${apiUrl}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: prompt.value }),
@@ -47,7 +50,9 @@ onMounted(() => nextTick(resize))
 
 <template>
   <div class="max-w-2xl w-full mx-auto space-y-6">
-    <h1 class="text-xl font-semibold text-heading">💬 LLM Chat</h1>
+    <h1 class="flex items-center gap-4 text-xl font-semibold text-heading">
+      <ChatBubbleLeftEllipsisIcon class="size-6" /> Model Chat
+    </h1>
 
     <form @submit.prevent="send" class="space-y-4">
       <fieldset>

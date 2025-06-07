@@ -125,7 +125,7 @@ This separation enables modular development, autonomous behavior, and semantic r
 
 Below is a high-level architecture diagram and description of each core component and how they interact:
 
-![Inception ICORE Architecture](./docs/images/inception-graph.png)
+![Inception ICORE Architecture](../../docs/images/inception-graph.png)
 
 ### BaseAgent & Sentience DSL
 

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Cog6ToothIcon } from '@heroicons/vue/24/outline'
+
+const apiUrl = import.meta.env.VITE_API_URL
 
 const code = ref('')
 const output = ref('')
@@ -26,7 +29,7 @@ async function runSentience() {
   loading.value = true
   output.value = ''
 
-  const res = await fetch('http://localhost:8080/sentience/run', {
+  const res = await fetch(`${apiUrl}/sentience/run`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code: code.value }),
@@ -40,7 +43,9 @@ async function runSentience() {
 
 <template>
   <div class="space-y-6 max-w-4xl mx-auto">
-    <h1 class="text-xl font-semibold text-color-heading">🧬 Sentience evaluator</h1>
+    <h1 class="flex items-center gap-4 text-xl font-semibold text-color-heading">
+      <Cog6ToothIcon class="size-6" /> Sentience evaluator
+    </h1>
 
     <form @submit.prevent="send" class="space-y-4">
       <fieldset>

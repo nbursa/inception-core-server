@@ -17,6 +17,8 @@
   --icore-accent-600: #2563eb;
 
   --icore-success-500: #22c55e;
+  --icore-danger-500: #c52222;
+  --icore-warning-500: #a2c522;
 }
 
 @theme {
@@ -35,6 +37,8 @@
   --color-accent-hover: var(--icore-accent-600);
 
   --color-success: var(--icore-success-500);
+  --color-warning: var(--icore-warning-500);
+  --color-danger: var(--icore-danger-500);
 
   --section-gap: 160px;
 }

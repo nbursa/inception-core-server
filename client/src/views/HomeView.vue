@@ -9,14 +9,16 @@ import {
   Cog6ToothIcon,
 } from '@heroicons/vue/24/outline'
 
-const status = ref('Online')
+defineProps<{
+  status: 'online' | 'offline' | 'loading'
+}>()
 
 const env = import.meta.env.MODE
 </script>
 
 <template>
   <div class="max-w-4xl mx-auto p-6 space-y-6">
-    <h1 class="text-2xl font-bold text-heading">🧠 Inception Dev UI</h1>
+    <h1 class="text-2xl font-bold text-heading">Inception Dev UI</h1>
 
     <Disclosure
       defaultOpen
@@ -38,10 +40,19 @@ const env = import.meta.env.MODE
 
       <DisclosurePanel v-show="open" class="px-4 pb-4 text-sm text-text font-mono space-y-1">
         <p>
-          ICORE: <span class="text-success">{{ status }}</span>
+          ICORE:
+          <span
+            class="capitalize"
+            :class="{
+              'text-success': status === 'online',
+              'text-danger': status === 'offline',
+              'text-warning': status === 'loading',
+            }"
+            >{{ status }}</span
+          >
         </p>
         <p>
-          Env: <span class="text-accent">{{ env }}</span>
+          Env: <span class="text-accent capitalize">{{ env }}</span>
         </p>
       </DisclosurePanel>
     </Disclosure>
@@ -64,10 +75,17 @@ const env = import.meta.env.MODE
         />
       </DisclosureButton>
 
-      <DisclosurePanel v-show="open" class="px-4 pb-4 text-sm text-text space-y-1">
-        <RouterLink to="/chat" class="text-accent hover:underline">Chat prompt tester →</RouterLink
-        ><br />
-        <RouterLink to="/mem" class="text-accent hover:underline">Memory overview →</RouterLink>
+      <DisclosurePanel v-show="open" class="flex gap-4 px-4 pb-4 text-sm text-text space-y-1">
+        <RouterLink
+          to="/chat"
+          class="px-4 py-2 m-0 rounded bg-accent text-heading hover:bg-accent-hover disabled:opacity-40 font-mono"
+          >Chat prompt tester →</RouterLink
+        >
+        <RouterLink
+          to="/mem"
+          class="px-4 py-2 rounded bg-accent text-heading hover:bg-accent-hover disabled:opacity-40 font-mono"
+          >Memory overview →</RouterLink
+        >
       </DisclosurePanel>
     </Disclosure>
 

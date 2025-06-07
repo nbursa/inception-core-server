@@ -3,7 +3,9 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 </script>
 
 <template>
-  <DefaultLayout>
-    <RouterView />
+  <DefaultLayout v-slot="{ status }">
+    <RouterView v-slot="{ Component }">
+      <component :is="Component" :status="status" />
+    </RouterView>
   </DefaultLayout>
 </template>
