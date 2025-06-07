@@ -1,15 +1,16 @@
-<template>
-  <div class="about">
-    <h1>This is an about page</h1>
-  </div>
-</template>
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { marked } from 'marked'
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+const content = ref('')
+
+onMounted(async () => {
+  const res = await fetch('README.md')
+  const md = await res.text()
+  content.value = marked(md)
+})
+</script>
+
+<template>
+  <div class="prose prose-invert max-w-4xl mx-auto text-sm text-color-text" v-html="content" />
+</template>

@@ -1,15 +1,15 @@
-use axum::{Router, routing::get, serve};
-use std::fs;
-use std::net::SocketAddr;
-use tokio::net::TcpListener;
-use tracing_subscriber::{EnvFilter, fmt};
-
 use crate::agents::{AGENT, BaseAgent};
 use crate::api::handlers::{LATENT_MEM, LONG_MEM, SHORT_MEM};
 use crate::api::routes::routes;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
+use axum::{Router, http::Method, routing::get, serve};
+use std::fs;
+use std::net::SocketAddr;
+use tokio::net::TcpListener;
+use tower_http::cors::{AllowHeaders, Any, CorsLayer};
+use tracing_subscriber::{EnvFilter, fmt};
 
 mod agents;
 mod api;
@@ -50,9 +50,15 @@ async fn main() {
         panic!("AGENT was already set");
     }
 
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([Method::GET, Method::POST])
+        .allow_headers(AllowHeaders::mirror_request());
+
     let app = Router::new()
         .route("/health", get(health_check))
-        .nest("/api", routes());
+        .nest("/api", routes())
+        .layer(cors);
 
     let addr: SocketAddr = "0.0.0.0:8080".parse().unwrap();
     let listener = TcpListener::bind(addr).await.unwrap();

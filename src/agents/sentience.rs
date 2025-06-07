@@ -46,8 +46,8 @@ mod tests {
     async fn test_sentience_basic() {
         let mut context = Context {
             mem_short: ShortTermMemory::new(),
-            mem_long: LongTermMemory::new(),
-            mem_latent: LatentMemory::new("dummy-collection-id"),
+            mem_long: LongTermMemory::new().await,
+            mem_latent: LatentMemory::new("dummy-collection-id").await,
         };
 
         let mut agent = SentienceAgent::new();
