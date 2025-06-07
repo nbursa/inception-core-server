@@ -36,6 +36,7 @@ async function runSentience() {
   })
 
   const data = await res.json()
+  console.log('data:', data)
   output.value = data.output || '[no response]'
   loading.value = false
 }

@@ -1,38 +1,59 @@
-use std::collections::HashMap;
-use std::sync::RwLock;
+use crate::api::handlers::{LATENT_MEM, LONG_MEM, SHORT_MEM};
+use crate::memory::latent::LatentMemory;
+use crate::memory::long_term::LongTermMemory;
+use crate::memory::short_term::ShortTermMemory;
 
-#[derive(Debug, Default)]
+#[derive(Clone)]
 pub struct Context {
-    data: RwLock<HashMap<String, String>>,
+    pub mem_short: ShortTermMemory,
+    pub mem_long: LongTermMemory,
+    pub mem_latent: LatentMemory,
 }
 
 impl Context {
     pub fn new() -> Self {
         Self {
-            data: RwLock::new(HashMap::new()),
+            mem_short: SHORT_MEM
+                .get()
+                .expect("short memory not initialized")
+                .clone(),
+            mem_long: LONG_MEM.get().expect("long memory not initialized").clone(),
+            mem_latent: LATENT_MEM
+                .get()
+                .expect("latent memory not initialized")
+                .clone(),
         }
     }
 
-    pub fn set(&self, key: &str, value: &str) {
-        if let Ok(mut map) = self.data.write() {
-            map.insert(key.to_string(), value.to_string());
-        }
+    pub fn set_short(&self, key: &str, value: &str) {
+        self.mem_short.set(key.to_string(), value.to_string());
     }
 
-    pub fn get(&self, key: &str) -> Option<String> {
-        self.data.read().ok()?.get(key).cloned()
+    pub fn get_short(&self, key: &str) -> Option<String> {
+        self.mem_short.get(key)
     }
 
-    pub fn clear(&self) {
-        if let Ok(mut map) = self.data.write() {
-            map.clear();
-        }
-    }
-
-    pub fn all(&self) -> Vec<(String, String)> {
-        self.data
-            .read()
-            .map(|map| map.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
+    pub fn all_short(&self) -> Vec<(String, String)> {
+        self.mem_short
+            .all()
             .unwrap_or_default()
+            .into_iter()
+            .collect()
+    }
+
+    pub async fn set_long(&self, key: &str, value: &str) {
+        self.mem_long.set(key, value).await;
+    }
+
+    pub async fn get_long(&self, key: &str) -> Option<String> {
+        self.mem_long.get(key).await
+    }
+
+    pub async fn embed_latent(&self, id: &str, vec: Vec<f32>) -> Result<(), String> {
+        self.mem_latent.embed(id, vec).await
+    }
+
+    pub async fn query_latent(&self, vec: Vec<f32>) -> Result<Vec<String>, String> {
+        self.mem_latent.query(vec).await
     }
 }

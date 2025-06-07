@@ -3,6 +3,7 @@ use crate::icore::model;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
+use axum::debug_handler;
 use axum::{
     extract::{Json, Path},
     http::StatusCode,
@@ -23,15 +24,15 @@ async fn long_mem() -> &'static LongTermMemory {
     LONG_MEM.get_or_init(|| panic!("LongTermMemory not initialized"))
 }
 
+pub async fn ping() -> &'static str {
+    "pong"
+}
+
 pub async fn get_all_short_mem() -> impl IntoResponse {
     match mem().all() {
         Some(map) => Json(map).into_response(),
         None => (StatusCode::INTERNAL_SERVER_ERROR, "memory lock failed").into_response(),
     }
-}
-
-pub async fn ping() -> &'static str {
-    "pong"
 }
 
 pub async fn get_short_mem(Path(key): Path<String>) -> impl IntoResponse {
@@ -107,6 +108,7 @@ pub struct ChatPayload {
     message: String,
 }
 
+#[debug_handler]
 pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     let agent = AGENT.get().unwrap();
     if let Some(response) = agent.handle(&payload.message).await {
@@ -129,13 +131,16 @@ pub struct SentienceResponse {
     pub output: String,
 }
 
+#[debug_handler]
 pub async fn sentience_run_handler(
     Json(payload): Json<SentienceRequest>,
 ) -> axum::Json<SentienceResponse> {
     let agent = AGENT.get().unwrap();
     if let Some(output) = agent.handle(&payload.code).await {
+        tracing::info!("Sentience output: {:?}", output);
         axum::Json(SentienceResponse { output })
     } else {
+        tracing::warn!("Sentience returned no output");
         axum::Json(SentienceResponse { output: "".into() })
     }
 }

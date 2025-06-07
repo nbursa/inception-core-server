@@ -6,5 +6,7 @@ pub async fn generate(prompt: &str) -> Result<String, IcoreError> {
         return Err(IcoreError::InvalidInput("prompt is empty".into()));
     }
 
-    llm::generate_local(prompt).map_err(|e| IcoreError::Model(e.to_string()))
+    llm::generate_local(prompt)
+        .await
+        .map_err(|e| IcoreError::Model(e.to_string()))
 }

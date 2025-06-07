@@ -1,7 +1,7 @@
 use std::env;
 
 use anyhow::{Result, anyhow};
-use reqwest::blocking::Client;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
@@ -17,7 +17,7 @@ struct LlamaResponse {
     text: String,
 }
 
-pub fn generate_local(prompt: &str) -> Result<String> {
+pub async fn generate_local(prompt: &str) -> Result<String> {
     if prompt.trim().is_empty() {
         return Err(anyhow!("prompt is empty"));
     }
@@ -35,21 +35,23 @@ pub fn generate_local(prompt: &str) -> Result<String> {
         .post(&url)
         .json(&req)
         .send()
+        .await
         .map_err(|e| anyhow!("HTTP error: {}", e))?
         .error_for_status()
         .map_err(|e| anyhow!("LLM server returned {}", e))?;
 
-    let parsed: LlamaResponse = res.json().map_err(|e| anyhow!("bad JSON: {}", e))?;
+    let parsed: LlamaResponse = res.json().await.map_err(|e| anyhow!("bad JSON: {}", e))?;
     Ok(parsed.text.trim().to_string())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn generate_returns_text() {
-        let out = generate_local("Explain Rust ownership model").unwrap();
+    #[tokio::test]
+    async fn generate_returns_text() {
+        let out = generate_local("Explain Rust ownership model")
+            .await
+            .unwrap();
         assert!(!out.is_empty());
     }
 }

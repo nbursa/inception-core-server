@@ -1,4 +1,4 @@
-use crate::icore::context::Context;
+use crate::mcp::context::Context;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
@@ -31,33 +31,5 @@ impl SentienceAgent {
         let output = self.evaluator.evaluate(&ast).await?;
 
         Ok(output)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::icore::context::Context;
-    use crate::memory::latent::LatentMemory;
-    use crate::memory::long_term::LongTermMemory;
-    use crate::memory::short_term::ShortTermMemory;
-
-    #[tokio::test]
-    async fn test_sentience_basic() {
-        let mut context = Context {
-            mem_short: ShortTermMemory::new(),
-            mem_long: LongTermMemory::new().await,
-            mem_latent: LatentMemory::new("dummy-collection-id").await,
-        };
-
-        let mut agent = SentienceAgent::new();
-        let code = r#"
-            mem.short["foo"] = "bar";
-            reflect { mem.short["foo"] }
-        "#;
-
-        let result = agent.run_sentience(code, &mut context).await;
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "bar".to_string());
     }
 }

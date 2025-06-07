@@ -1,9 +1,9 @@
 use crate::agents::sentience_wrapper::SentienceWrapper;
 use crate::icore::context::Context;
-use std::sync::Mutex;
+use tokio::sync::Mutex;
 
 pub struct BaseAgent {
-    context: Context,
+    pub context: Context,
     sentience: Option<Mutex<SentienceWrapper>>,
 }
 
@@ -15,23 +15,28 @@ impl BaseAgent {
         }
     }
 
-    pub fn load_sentience(&mut self, code: &str) -> Result<(), String> {
+    pub async fn load_sentience(&mut self, code: &str) -> Result<(), String> {
         let mut wrapper = SentienceWrapper::new();
-        wrapper.load_program(code)?;
+        wrapper.load_program(code).await?;
         self.sentience = Some(Mutex::new(wrapper));
         Ok(())
+    }
+
+    fn flush_to_global_short(&self) {
+        if let Some(global) = crate::api::handlers::SHORT_MEM.get() {
+            for (k, v) in self.context.all() {
+                global.set(k.clone(), v.clone());
+            }
+        }
     }
 
     pub async fn handle(&self, input: &str) -> Option<String> {
         let trimmed = input.trim();
 
         if let Some(wrapper_mutex) = &self.sentience {
-            let mut guard = wrapper_mutex.lock().unwrap();
-            let code = format!("on input({}) {{ }}", trimmed);
-            let _ = guard.handle_code(&code);
-            let resp = guard.inner.get_short("response");
-            if !resp.is_empty() {
-                return Some(resp);
+            let mut guard = wrapper_mutex.lock().await;
+            if let Some(output) = guard.handle_code(trimmed) {
+                return Some(output);
             }
         }
 
@@ -41,6 +46,7 @@ impl BaseAgent {
                 let key = parts[0].trim();
                 let value = parts[1].trim();
                 self.context.set(key, value);
+                self.flush_to_global_short();
                 return Some(format!("Okay, remembered {} = {}", key, value));
             }
         }
@@ -64,6 +70,7 @@ impl BaseAgent {
             return Some(format!("Context does not include '{}'", keyword));
         }
 
+        self.flush_to_global_short();
         None
     }
 }

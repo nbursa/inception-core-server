@@ -38,6 +38,7 @@ async fn main() {
         Ok(sent_code) => {
             base_agent
                 .load_sentience(&sent_code)
+                .await
                 .expect("Sentience load failed");
             println!("Loaded Sentience DSL from agent.sent");
         }

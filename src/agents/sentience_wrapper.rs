@@ -1,7 +1,5 @@
-use sentience::SentienceAgent;
-use tokio::task;
-
 use crate::api::handlers::{LONG_MEM, SHORT_MEM};
+use sentience::SentienceAgent;
 
 pub struct SentienceWrapper {
     pub inner: SentienceAgent,
@@ -9,67 +7,46 @@ pub struct SentienceWrapper {
 
 impl SentienceWrapper {
     pub fn new() -> Self {
-        SentienceWrapper {
-            inner: SentienceAgent::new(),
+        let mut agent = SentienceAgent::new();
+
+        if let Some(short) = SHORT_MEM.get() {
+            if let Some(all) = short.all() {
+                for (k, v) in all {
+                    agent.set_short(&k, &v);
+                }
+            }
         }
+
+        Self { inner: agent }
     }
 
-    pub fn load_program(&mut self, program: &str) -> Result<(), String> {
-        self.inner.run_sentience(program)?;
+    pub async fn load_program(&mut self, code: &str) -> Result<(), String> {
+        if let Some(long) = LONG_MEM.get() {
+            let data = long.all().await;
+            for (k, v) in data {
+                self.inner.set_long(&k, &v);
+            }
+        }
+
+        let _ = self.inner.run_sentience(code)?;
+        self.flush_back();
         Ok(())
     }
 
-    fn seed_short(&mut self) {
-        let global = SHORT_MEM.get().unwrap();
-        if let Some(map) = global.all() {
-            for (k, v) in map.into_iter() {
-                self.inner.set_short(&k, &v);
+    pub fn handle_code(&mut self, code: &str) -> Option<String> {
+        let result = self.inner.run_sentience(code);
+        self.flush_back();
+        match result {
+            Ok(s) if !s.trim().is_empty() => Some(s),
+            _ => None,
+        }
+    }
+
+    fn flush_back(&self) {
+        if let Some(short) = SHORT_MEM.get() {
+            for (k, v) in self.inner.all_short() {
+                short.set(k, v);
             }
         }
-    }
-
-    fn seed_long(&mut self) {
-        let global = LONG_MEM.get().unwrap();
-
-        let all_vec: Vec<(String, String)> = task::block_in_place(|| {
-            let rt = tokio::runtime::Handle::current();
-            rt.block_on(global.all())
-        });
-
-        for (k, v) in all_vec.into_iter() {
-            self.inner.set_long(&k, &v);
-        }
-    }
-
-    fn flush_short(&self) {
-        let global = SHORT_MEM.get().unwrap();
-        let all_map = self.inner.all_short();
-        for (k, v) in all_map.into_iter() {
-            global.set(k, v);
-        }
-    }
-
-    fn flush_long(&self) {
-        let global = LONG_MEM.get().unwrap();
-        let all_map = self.inner.all_long();
-        for (k, v) in all_map.into_iter() {
-            task::block_in_place(|| {
-                let rt = tokio::runtime::Handle::current();
-                rt.block_on(global.set(&k, &v))
-            });
-        }
-    }
-
-    pub fn handle_code(&mut self, code: &str) -> Result<String, String> {
-        self.seed_short();
-        self.seed_long();
-
-        // run_sentience is synchronous, so call directly
-        let res = self.inner.run_sentience(code);
-
-        self.flush_short();
-        self.flush_long();
-
-        res
     }
 }
