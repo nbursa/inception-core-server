@@ -45,7 +45,7 @@ impl BaseAgent {
             if parts.len() == 2 {
                 let key = parts[0].trim();
                 let value = parts[1].trim();
-                self.context.set(key, value);
+                self.context.set_short(key, value);
                 self.flush_to_global_short();
                 return Some(format!("Okay, remembered {} = {}", key, value));
             }
@@ -53,7 +53,7 @@ impl BaseAgent {
 
         if let Some(rest) = trimmed.strip_prefix("recall ") {
             let key = rest.trim();
-            if let Some(val) = self.context.get(key) {
+            if let Some(val) = self.context.get_short(key) {
                 return Some(format!("{} = {}", key, val));
             } else {
                 return Some(format!("I don't remember '{}'", key));
@@ -62,7 +62,7 @@ impl BaseAgent {
 
         if let Some(rest) = trimmed.strip_prefix("if context includes ") {
             let keyword = rest.trim();
-            for (_k, val) in self.context.all() {
+            for (_k, val) in self.context.all_short() {
                 if val.contains(keyword) {
                     return Some(format!("Context includes '{}'", keyword));
                 }

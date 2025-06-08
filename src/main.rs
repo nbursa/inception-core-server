@@ -7,6 +7,7 @@ use crate::memory::short_term::ShortTermMemory;
 use axum::{Router, http::Method, routing::get, serve};
 use std::fs;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::{AllowHeaders, Any, CorsLayer};
 use tracing_subscriber::{EnvFilter, fmt};
@@ -47,7 +48,8 @@ async fn main() {
         }
     }
 
-    if AGENT.set(base_agent).is_err() {
+    let agent_arc = Arc::new(base_agent);
+    if AGENT.set(agent_arc).is_err() {
         panic!("AGENT was already set");
     }
 
