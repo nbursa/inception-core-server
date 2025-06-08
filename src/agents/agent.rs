@@ -24,7 +24,7 @@ impl BaseAgent {
 
     fn flush_to_global_short(&self) {
         if let Some(global) = crate::api::handlers::SHORT_MEM.get() {
-            for (k, v) in self.context.all() {
+            for (k, v) in self.context.all_short() {
                 global.set(k.clone(), v.clone());
             }
         }
