@@ -114,6 +114,7 @@ pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     let mut ctx = Context::new();
     let response = agent.handle(&payload.message, &mut ctx).await;
     agent.flush_to_global_short(&mut ctx);
+    agent.flush_to_global_long(&ctx).await;
 
     axum::Json(response.unwrap_or_else(|| "No response.".to_string()))
 }
@@ -168,6 +169,7 @@ pub async fn sentience_run_handler(
     let mut ctx = Context::new();
     let output = agent.handle(&payload.code, &mut ctx).await;
     agent.flush_to_global_short(&mut ctx);
+    agent.flush_to_global_long(&ctx).await;
 
     axum::Json(SentienceResponse {
         output: output.unwrap_or_else(|| "".to_string()),
