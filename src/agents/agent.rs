@@ -51,6 +51,12 @@ impl BaseAgent {
         }
     }
 
+    pub async fn flush_to_global_long(&self, ctx: &Context) {
+        for (k, v) in self.ctx.mem_long.iter() {
+            ctx.mem_long.set(k, v).await;
+        }
+    }
+
     pub fn get_short(&self, key: &str) -> Option<String> {
         Some(self.ctx.get_mem("short", key))
     }
