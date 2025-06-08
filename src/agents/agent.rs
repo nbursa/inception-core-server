@@ -1,76 +1,59 @@
-use crate::agents::sentience_wrapper::SentienceWrapper;
 use crate::icore::context::Context;
-use tokio::sync::Mutex;
+use sentience::evaluator::Evaluator;
+use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct BaseAgent {
-    pub context: Context,
-    sentience: Option<Mutex<SentienceWrapper>>,
+    pub name: String,
+    pub goal: String,
+    pub evaluator: Evaluator,
 }
 
 impl BaseAgent {
-    pub fn new() -> Self {
+    pub fn new(name: String, goal: String) -> Self {
         BaseAgent {
-            context: Context::new(),
-            sentience: None,
+            name,
+            goal,
+            evaluator: Evaluator::new(),
         }
     }
 
-    pub async fn load_sentience(&mut self, code: &str) -> Result<(), String> {
-        let mut wrapper = SentienceWrapper::new();
-        wrapper.load_program(code).await?;
-        self.sentience = Some(Mutex::new(wrapper));
-        Ok(())
+    pub fn load(&mut self, code: &str) -> Result<(), String> {
+        self.evaluator
+            .load_program(code)
+            .map_err(|e| format!("Failed to load: {}", e))
     }
 
-    fn flush_to_global_short(&self) {
-        if let Some(global) = crate::api::handlers::SHORT_MEM.get() {
-            for (k, v) in self.context.all_short() {
-                global.set(k.clone(), v.clone());
+    pub async fn handle(&mut self, input: &str, ctx: &mut Context) -> Option<String> {
+        self.evaluator.attach_short_mem(ctx.mem_short.clone());
+        self.evaluator.attach_long_mem(ctx.mem_long.clone());
+        self.evaluator.attach_latent_mem(ctx.mem_latent.clone());
+
+        let result = self.evaluator.handle_input(input).await.ok()?;
+        Some(result)
+    }
+
+    pub fn flush_to_global_short(&self, ctx: &mut Context) {
+        if let Some(map) = self.evaluator.get_all_short() {
+            for (k, v) in map {
+                ctx.mem_short.set(k, v);
             }
         }
     }
 
-    pub async fn handle(&self, input: &str) -> Option<String> {
-        let trimmed = input.trim();
+    pub fn get_short(&self, key: &str) -> Option<String> {
+        self.evaluator.get_short(key)
+    }
 
-        if let Some(wrapper_mutex) = &self.sentience {
-            let mut guard = wrapper_mutex.lock().await;
-            if let Some(output) = guard.handle_code(trimmed) {
-                return Some(output);
-            }
-        }
+    pub fn get_long(&self, key: &str) -> Option<String> {
+        self.evaluator.get_long(key)
+    }
 
-        if let Some(rest) = trimmed.strip_prefix("remember ") {
-            let parts: Vec<&str> = rest.splitn(2, '=').collect();
-            if parts.len() == 2 {
-                let key = parts[0].trim();
-                let value = parts[1].trim();
-                self.context.set_short(key, value);
-                self.flush_to_global_short();
-                return Some(format!("Okay, remembered {} = {}", key, value));
-            }
-        }
+    pub fn all_short(&self) -> Option<HashMap<String, String>> {
+        self.evaluator.get_all_short()
+    }
 
-        if let Some(rest) = trimmed.strip_prefix("recall ") {
-            let key = rest.trim();
-            if let Some(val) = self.context.get_short(key) {
-                return Some(format!("{} = {}", key, val));
-            } else {
-                return Some(format!("I don't remember '{}'", key));
-            }
-        }
-
-        if let Some(rest) = trimmed.strip_prefix("if context includes ") {
-            let keyword = rest.trim();
-            for (_k, val) in self.context.all_short() {
-                if val.contains(keyword) {
-                    return Some(format!("Context includes '{}'", keyword));
-                }
-            }
-            return Some(format!("Context does not include '{}'", keyword));
-        }
-
-        self.flush_to_global_short();
-        None
+    pub fn all_long(&self) -> Option<HashMap<String, String>> {
+        self.evaluator.get_all_long()
     }
 }

@@ -21,20 +21,21 @@ async function checkHealth() {
     status.value = res.ok ? 'online' : 'offline'
   } catch {
     status.value = 'offline'
-  } finally {
-    timeoutId = window.setTimeout(() => {
-      window.requestIdleCallback(checkHealth)
-    }, 5000)
   }
+  // finally {
+  //   timeoutId = window.setTimeout(() => {
+  //     window.requestIdleCallback(checkHealth)
+  //   }, 5000)
+  // }
 }
 
 onMounted(() => {
   checkHealth()
 })
 
-onBeforeUnmount(() => {
-  clearTimeout(timeoutId)
-})
+// onBeforeUnmount(() => {
+//   clearTimeout(timeoutId)
+// })
 </script>
 
 <template>

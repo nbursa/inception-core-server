@@ -111,15 +111,23 @@ pub struct ChatPayload {
 #[debug_handler]
 pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     let agent = AGENT.get().unwrap();
-    if let Some(response) = agent.handle(&payload.message).await {
-        axum::Json(response)
-    } else {
-        match model::generate(&payload.message).await {
-            Ok(response) => axum::Json(response),
-            Err(_) => axum::Json("LLM error".into()),
-        }
-    }
+    let response = agent.handle(&payload.message).await;
+    tracing::info!("Chat input: {:?}", payload.message);
+    tracing::info!("Chat output: {:?}", response);
+
+    axum::Json(response.unwrap_or("No response.".to_string()))
 }
+// pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
+//     let agent = AGENT.get().unwrap();
+//     if let Some(response) = agent.handle(&payload.message).await {
+//         axum::Json(response)
+//     } else {
+//         match model::generate(&payload.message).await {
+//             Ok(response) => axum::Json(response),
+//             Err(_) => axum::Json("LLM error".into()),
+//         }
+//     }
+// }
 
 #[derive(Deserialize)]
 pub struct SentienceRequest {

@@ -11,6 +11,7 @@ async function fetchMemory() {
   loading.value = true
   const res = await fetch(`${apiUrl}/mem/short/all`)
   const data = await res.json()
+  console.log('short memory: ', data)
   entries.value = Object.entries(data).map(([key, value]) => ({ key, value }))
   loading.value = false
 }

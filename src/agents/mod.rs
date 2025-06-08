@@ -1,5 +1,4 @@
 pub mod agent;
-pub mod sentience_wrapper;
 
 use std::sync::Arc;
 
