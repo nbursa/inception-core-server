@@ -132,15 +132,9 @@ Below is a high-level architecture diagram and description of each core componen
 - **BaseAgent** (`agents/agent.rs`):
 
   - Maintains an in-process context (`Context`) for simple “remember/recall/if context includes” logic.
-  - Optionally holds a `SentienceWrapper` (via `Mutex<SentienceWrapper>`) when DSL code is loaded.
+  - Loads and executes Sentience DSL code directly using the `sentience` crate.
+  - During `handle`, DSL memory is seeded from global stores and flushed back after execution.
 
-- **SentienceWrapper** (`agents/sentience_wrapper.rs`):
-  - Wraps a `SentienceAgent` (from the `sentience` crate).
-  - On each `handle_code(code_str)`, it:
-    1. **Seeds** the DSL’s internal memories with global short/long memory.
-    2. Executes the DSL code synchronously.
-    3. **Flushes** any writes back to global short/long memory.
-  - Allows DSL scripts (e.g., `agent.sent`) to read/write both short-term and long-term global stores.
 
 ### Memory Layers
 
@@ -688,7 +682,7 @@ Content-Type: application/json
      on input(<message>) { … }
      ```
 
-     – Calls `SentienceWrapper.handle_code(...)` synchronously.
+     – The agent executes this snippet via its built-in DSL engine.
      – After execution, checks if DSL wrote a `"response"` key in its internal short memory. If so, returns that as the response.
 
   2. If DSL didn’t produce a response (or DSL isn’t loaded):
@@ -736,7 +730,7 @@ Content-Type: application/json
 
 - **Behavior**
 
-  - Wraps the provided `code` string and calls `SentienceWrapper.handle_code(code)`.
+  - The agent executes the provided `code` snippet using its internal DSL engine.
   - Returns whatever the DSL code returned (if any) or an empty string if nothing was returned.
 
 - **Response**
@@ -801,7 +795,7 @@ Content-Type: application/json
 
    - `mem.short[<key>] = <value>` reads/writes short-term memory.
    - `mem.long[<key>] = <value>` reads/writes long-term memory (SQLite).
-   - The wrapper seeds both memories at `handle_code` entry and flushes any writes at exit.
+   - The agent seeds both memories when handling code and flushes updates after execution.
 
 4. **Sending Responses**
 
@@ -832,7 +826,6 @@ inception-ICORE-server/
 │   │   └── settings.rs
 │   ├── agents/
 │   │   ├── agent.rs      # BaseAgent implementation & DSL integration
-│   │   ├── sentience_wrapper.rs
 │   │   └── mod.rs        # Re-exports AGENT, BaseAgent, SentienceAgent
 │   ├── api/
 │   │   ├── routes.rs     # Defines Axum router & endpoints
