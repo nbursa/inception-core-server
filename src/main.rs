@@ -34,11 +34,14 @@ async fn main() {
         .set(LatentMemory::new(settings.chromadb_url.clone()).await)
         .unwrap();
 
-    let mut base_agent = BaseAgent::new();
+    let mut base_agent = BaseAgent::new(
+        "Reflector".to_string(),
+        "Reflective memory agent".to_string(),
+    );
     match fs::read_to_string("agent.sent") {
         Ok(sent_code) => {
             base_agent
-                .load_sentience(&sent_code)
+                .load(&sent_code)
                 .await
                 .expect("Sentience load failed");
             println!("Loaded Sentience DSL from agent.sent");

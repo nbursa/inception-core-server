@@ -18,9 +18,10 @@ impl BaseAgent {
         }
     }
 
-    pub fn load(&mut self, code: &str) -> Result<(), String> {
+    pub async fn load(&mut self, code: &str) -> Result<(), String> {
         self.evaluator
             .load_program(code)
+            .await
             .map_err(|e| format!("Failed to load: {}", e))
     }
 
