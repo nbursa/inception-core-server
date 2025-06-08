@@ -1,8 +1,8 @@
-pub mod agent;
-
-use std::sync::Arc;
-
 pub use agent::BaseAgent;
 use once_cell::sync::OnceCell;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
-pub static AGENT: OnceCell<Arc<BaseAgent>> = OnceCell::new();
+pub mod agent;
+
+pub static AGENT: OnceCell<Arc<Mutex<BaseAgent>>> = OnceCell::new();

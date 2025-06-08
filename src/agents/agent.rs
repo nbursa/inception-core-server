@@ -1,12 +1,13 @@
 use crate::icore::context::Context;
-use sentience::evaluator::Evaluator;
+use sentience::{
+    context::AgentContext, eval::eval, lexer::Lexer, parser::Parser, types::Statement,
+};
 use std::collections::HashMap;
 
-#[derive(Clone)]
 pub struct BaseAgent {
     pub name: String,
     pub goal: String,
-    pub evaluator: Evaluator,
+    ctx: AgentContext,
 }
 
 impl BaseAgent {
@@ -14,47 +15,60 @@ impl BaseAgent {
         BaseAgent {
             name,
             goal,
-            evaluator: Evaluator::new(),
+            ctx: AgentContext::new(),
         }
     }
 
     pub async fn load(&mut self, code: &str) -> Result<(), String> {
-        self.evaluator
-            .load_program(code)
-            .await
-            .map_err(|e| format!("Failed to load: {}", e))
+        let mut lexer = Lexer::new(code.trim());
+        let mut parser = Parser::new(&mut lexer);
+        let program = parser.parse_program();
+        for stmt in program.statements {
+            eval(&stmt, "", "", &mut self.ctx);
+        }
+        Ok(())
     }
 
     pub async fn handle(&mut self, input: &str, ctx: &mut Context) -> Option<String> {
-        self.evaluator.attach_short_mem(ctx.mem_short.clone());
-        self.evaluator.attach_long_mem(ctx.mem_long.clone());
-        self.evaluator.attach_latent_mem(ctx.mem_latent.clone());
+        if let Some(short) = ctx.mem_short.all() {
+            self.ctx.mem_short = short;
+        }
 
-        let result = self.evaluator.handle_input(input).await.ok()?;
-        Some(result)
+        let long_vec = ctx.mem_long.all().await;
+        self.ctx.mem_long = long_vec.into_iter().collect::<HashMap<_, _>>();
+
+        if let Some(Statement::AgentDeclaration { body, .. }) = self.ctx.current_agent.clone() {
+            for stmt in body {
+                if let Statement::OnInput { body, .. } = stmt {
+                    for inner in body {
+                        eval(&inner, "", input, &mut self.ctx);
+                    }
+                    return self.ctx.output.clone();
+                }
+            }
+        }
+        None
     }
 
     pub fn flush_to_global_short(&self, ctx: &mut Context) {
-        if let Some(map) = self.evaluator.get_all_short() {
-            for (k, v) in map {
-                ctx.mem_short.set(k, v);
-            }
+        for (k, v) in self.ctx.mem_short.iter() {
+            ctx.mem_short.set(k.clone(), v.clone());
         }
     }
 
     pub fn get_short(&self, key: &str) -> Option<String> {
-        self.evaluator.get_short(key)
+        Some(self.ctx.get_mem("short", key))
     }
 
     pub fn get_long(&self, key: &str) -> Option<String> {
-        self.evaluator.get_long(key)
+        Some(self.ctx.get_mem("long", key))
     }
 
     pub fn all_short(&self) -> Option<HashMap<String, String>> {
-        self.evaluator.get_all_short()
+        Some(self.ctx.mem_short.clone())
     }
 
     pub fn all_long(&self) -> Option<HashMap<String, String>> {
-        self.evaluator.get_all_long()
+        Some(self.ctx.mem_long.clone())
     }
 }

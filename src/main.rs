@@ -4,12 +4,13 @@ use crate::api::routes::routes;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
-use axum::{Router, http::Method, routing::get, serve};
+use axum::{Router, http::Method, routing::get};
 use std::fs;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tower_http::cors::{AllowHeaders, Any, CorsLayer};
+use tokio::sync::Mutex;
+use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{EnvFilter, fmt};
 
 mod agents;
@@ -40,10 +41,9 @@ async fn main() {
     );
     match fs::read_to_string("agent.sent") {
         Ok(sent_code) => {
-            base_agent
-                .load(&sent_code)
-                .await
-                .expect("Sentience load failed");
+            if let Err(e) = base_agent.load(&sent_code).await {
+                panic!("Sentience load failed: {}", e);
+            }
             println!("Loaded Sentience DSL from agent.sent");
         }
         Err(_) => {
@@ -51,15 +51,14 @@ async fn main() {
         }
     }
 
-    let agent_arc = Arc::new(base_agent);
+    let agent_arc = Arc::new(Mutex::new(base_agent));
     if AGENT.set(agent_arc).is_err() {
         panic!("AGENT was already set");
     }
 
     let cors = CorsLayer::new()
         .allow_origin(Any)
-        .allow_methods([Method::GET, Method::POST])
-        .allow_headers(AllowHeaders::mirror_request());
+        .allow_methods([Method::GET, Method::POST]);
 
     let app = Router::new()
         .route("/health", get(health_check))
@@ -69,7 +68,7 @@ async fn main() {
     let addr: SocketAddr = "0.0.0.0:8080".parse().unwrap();
     let listener = TcpListener::bind(addr).await.unwrap();
     tracing::info!("Listening on http://{}", addr);
-    serve(listener, app).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn health_check() -> &'static str {

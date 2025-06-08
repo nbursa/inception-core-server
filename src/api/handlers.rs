@@ -1,5 +1,4 @@
 use crate::agents::AGENT;
-use crate::icore::model;
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::short_term::ShortTermMemory;
@@ -110,24 +109,14 @@ pub struct ChatPayload {
 
 #[debug_handler]
 pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
-    let agent = AGENT.get().unwrap();
-    let response = agent.handle(&payload.message).await;
-    tracing::info!("Chat input: {:?}", payload.message);
-    tracing::info!("Chat output: {:?}", response);
+    let agent_lock = AGENT.get().unwrap().clone();
+    let mut agent = agent_lock.lock().await;
 
-    axum::Json(response.unwrap_or("No response.".to_string()))
+    let mut ctx = crate::icore::context::Context::new();
+    let response = agent.handle(&payload.message, &mut ctx).await;
+
+    axum::Json(response.unwrap_or_else(|| "No response.".to_string()))
 }
-// pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
-//     let agent = AGENT.get().unwrap();
-//     if let Some(response) = agent.handle(&payload.message).await {
-//         axum::Json(response)
-//     } else {
-//         match model::generate(&payload.message).await {
-//             Ok(response) => axum::Json(response),
-//             Err(_) => axum::Json("LLM error".into()),
-//         }
-//     }
-// }
 
 #[derive(Deserialize)]
 pub struct SentienceRequest {
@@ -143,12 +132,15 @@ pub struct SentienceResponse {
 pub async fn sentience_run_handler(
     Json(payload): Json<SentienceRequest>,
 ) -> axum::Json<SentienceResponse> {
-    let agent = AGENT.get().unwrap();
-    if let Some(output) = agent.handle(&payload.code).await {
-        tracing::info!("Sentience output: {:?}", output);
+    let agent_lock = AGENT.get().unwrap().clone();
+    let mut agent = agent_lock.lock().await;
+
+    let mut ctx = crate::icore::context::Context::new();
+    if let Some(output) = agent.handle(&payload.code, &mut ctx).await {
         axum::Json(SentienceResponse { output })
     } else {
-        tracing::warn!("Sentience returned no output");
-        axum::Json(SentienceResponse { output: "".into() })
+        axum::Json(SentienceResponse {
+            output: "".to_string(),
+        })
     }
 }
