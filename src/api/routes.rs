@@ -16,4 +16,8 @@ pub fn routes() -> Router {
         .route("/mem/latent/query", post(handlers::query_latent))
         .route("/chat", post(handlers::chat))
         .route("/sentience/run", post(handlers::sentience_run_handler))
+        .route("/agent/short/:key", get(handlers::agent_get_short))
+        .route("/agent/long/:key", get(handlers::agent_get_long))
+        .route("/agent/short/all", get(handlers::agent_all_short))
+        .route("/agent/long/all", get(handlers::agent_all_long))
 }

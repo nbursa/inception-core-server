@@ -1,9 +1,8 @@
 use crate::agents::AGENT;
-use crate::memory::latent::LatentMemory;
-use crate::memory::long_term::LongTermMemory;
-use crate::memory::short_term::ShortTermMemory;
-use axum::debug_handler;
+use crate::icore::context::Context;
+use crate::memory::{latent::LatentMemory, long_term::LongTermMemory, short_term::ShortTermMemory};
 use axum::{
+    debug_handler,
     extract::{Json, Path},
     http::StatusCode,
     response::IntoResponse,
@@ -16,11 +15,11 @@ pub static LONG_MEM: OnceLock<LongTermMemory> = OnceLock::new();
 pub static LATENT_MEM: OnceLock<LatentMemory> = OnceLock::new();
 
 fn mem() -> &'static ShortTermMemory {
-    SHORT_MEM.get_or_init(ShortTermMemory::new)
+    SHORT_MEM.get().expect("Short-term memory not initialized")
 }
 
 async fn long_mem() -> &'static LongTermMemory {
-    LONG_MEM.get_or_init(|| panic!("LongTermMemory not initialized"))
+    LONG_MEM.get().expect("Long-term memory not initialized")
 }
 
 pub async fn ping() -> &'static str {
@@ -112,10 +111,41 @@ pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     let agent_lock = AGENT.get().unwrap().clone();
     let mut agent = agent_lock.lock().await;
 
-    let mut ctx = crate::icore::context::Context::new();
+    let mut ctx = Context::new();
     let response = agent.handle(&payload.message, &mut ctx).await;
+    agent.flush_to_global_short(&mut ctx);
 
     axum::Json(response.unwrap_or_else(|| "No response.".to_string()))
+}
+
+#[debug_handler]
+pub async fn agent_get_short(Path(key): Path<String>) -> impl IntoResponse {
+    let agent = AGENT.get().unwrap().lock().await;
+    match agent.get_short(&key) {
+        Some(val) => (StatusCode::OK, val),
+        None => (StatusCode::NOT_FOUND, "key not found".to_string()),
+    }
+}
+
+#[debug_handler]
+pub async fn agent_get_long(Path(key): Path<String>) -> impl IntoResponse {
+    let agent = AGENT.get().unwrap().lock().await;
+    match agent.get_long(&key) {
+        Some(val) => (StatusCode::OK, val),
+        None => (StatusCode::NOT_FOUND, "key not found".to_string()),
+    }
+}
+
+#[debug_handler]
+pub async fn agent_all_short() -> impl IntoResponse {
+    let agent = AGENT.get().unwrap().lock().await;
+    Json(agent.all_short().unwrap_or_default())
+}
+
+#[debug_handler]
+pub async fn agent_all_long() -> impl IntoResponse {
+    let agent = AGENT.get().unwrap().lock().await;
+    Json(agent.all_long().unwrap_or_default())
 }
 
 #[derive(Deserialize)]
@@ -135,12 +165,11 @@ pub async fn sentience_run_handler(
     let agent_lock = AGENT.get().unwrap().clone();
     let mut agent = agent_lock.lock().await;
 
-    let mut ctx = crate::icore::context::Context::new();
-    if let Some(output) = agent.handle(&payload.code, &mut ctx).await {
-        axum::Json(SentienceResponse { output })
-    } else {
-        axum::Json(SentienceResponse {
-            output: "".to_string(),
-        })
-    }
+    let mut ctx = Context::new();
+    let output = agent.handle(&payload.code, &mut ctx).await;
+    agent.flush_to_global_short(&mut ctx);
+
+    axum::Json(SentienceResponse {
+        output: output.unwrap_or_else(|| "".to_string()),
+    })
 }

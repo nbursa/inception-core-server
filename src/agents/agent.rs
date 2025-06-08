@@ -29,13 +29,8 @@ impl BaseAgent {
         Ok(())
     }
 
-    pub async fn handle(&mut self, input: &str, ctx: &mut Context) -> Option<String> {
-        if let Some(short) = ctx.mem_short.all() {
-            self.ctx.mem_short = short;
-        }
-
-        let long_vec = ctx.mem_long.all().await;
-        self.ctx.mem_long = long_vec.into_iter().collect::<HashMap<_, _>>();
+    pub async fn handle(&mut self, input: &str) -> Option<String> {
+        self.ctx.set_mem("short", "msg", input);
 
         if let Some(Statement::AgentDeclaration { body, .. }) = self.ctx.current_agent.clone() {
             for stmt in body {
