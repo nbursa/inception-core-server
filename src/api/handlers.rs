@@ -1,5 +1,8 @@
 use crate::agents::AGENT;
 use crate::icore::context::Context;
+use crate::memory::semantic::latent_graph::SEMANTIC_GRAPH;
+use crate::memory::semantic::object::{AffectScore, ObjectCluster};
+use crate::memory::semantic::reflect::reflect;
 use crate::memory::{latent::LatentMemory, long_term::LongTermMemory, short_term::ShortTermMemory};
 use axum::{
     debug_handler,
@@ -8,6 +11,7 @@ use axum::{
     response::IntoResponse,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::sync::OnceLock;
 
 pub static SHORT_MEM: OnceLock<ShortTermMemory> = OnceLock::new();
@@ -176,4 +180,31 @@ pub async fn sentience_run_handler(
     axum::Json(SentienceResponse {
         output: output.unwrap_or_else(|| "".to_string()),
     })
+}
+
+#[derive(Deserialize)]
+pub struct SemanticPayload {
+    pub id: String,
+    pub embedding: Vec<f32>,
+}
+
+#[axum::debug_handler]
+pub async fn embed_semantic(Json(payload): Json<SemanticPayload>) -> impl IntoResponse {
+    let mut graph = SEMANTIC_GRAPH.lock().unwrap();
+    let cluster = ObjectCluster {
+        name: payload.id.clone(),
+        embedding: payload.embedding,
+        tags: vec![],
+        affect: AffectScore::from_value(0.0),
+        known: false,
+    };
+    graph.add_cluster(payload.id.clone(), cluster);
+    (StatusCode::OK, Json(json!({ "status": "ok" })))
+}
+
+#[axum::debug_handler]
+pub async fn reflect_semantic(Path(id): Path<String>) -> impl IntoResponse {
+    let graph = SEMANTIC_GRAPH.lock().unwrap();
+    let result = reflect(&graph, &id);
+    (StatusCode::OK, Json(result))
 }

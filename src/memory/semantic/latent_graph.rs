@@ -1,5 +1,9 @@
 use crate::memory::semantic::object::ObjectCluster;
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
+use std::sync::Mutex;
+
+pub static SEMANTIC_GRAPH: Lazy<Mutex<LatentGraph>> = Lazy::new(|| Mutex::new(LatentGraph::new()));
 
 #[derive(Clone)]
 pub struct LatentGraph {
