@@ -58,7 +58,8 @@ async fn main() {
 
     let cors = CorsLayer::new()
         .allow_origin(Any)
-        .allow_methods([Method::GET, Method::POST]);
+        .allow_methods([Method::GET, Method::POST])
+        .allow_headers([axum::http::header::CONTENT_TYPE]);
 
     let app = Router::new()
         .route("/health", get(health_check))

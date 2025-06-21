@@ -1,6 +1,7 @@
 use crate::api::handlers::{LATENT_MEM, LONG_MEM, SHORT_MEM};
 use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
+use crate::memory::semantic::LatentGraph;
 use crate::memory::short_term::ShortTermMemory;
 
 #[derive(Clone)]
@@ -8,6 +9,7 @@ pub struct Context {
     pub mem_short: ShortTermMemory,
     pub mem_long: LongTermMemory,
     pub mem_latent: LatentMemory,
+    pub mem_semantic: LatentGraph,
 }
 
 impl Context {
@@ -22,6 +24,7 @@ impl Context {
                 .get()
                 .expect("latent memory not initialized")
                 .clone(),
+            mem_semantic: LatentGraph::default(),
         }
     }
 

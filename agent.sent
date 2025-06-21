@@ -1,14 +1,7 @@
-agent Reflector {
+agent Echo {
   mem short
-  goal: "Reflective memory agent"
-
-  on input {
-    mem.short["last_input"] = input
-
-    if context includes "secret" {
-      output = "I noticed you mentioned something secretive..."
-    } else {
-      output = "You said: " + input
-    }
+  goal: "Test agent"
+  on input(msg) {
+    output = msg
   }
 }

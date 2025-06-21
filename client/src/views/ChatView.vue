@@ -37,7 +37,10 @@ async function send() {
     })
 
     const data = await res.json()
-    response.value = data.response || '[no response]'
+    // const data = await res.text()
+
+    console.log('data =>', data)
+    response.value = data || '[no response]'
   } catch (err) {
     response.value = '[error]'
   } finally {

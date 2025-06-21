@@ -26,10 +26,13 @@ impl BaseAgent {
         for stmt in program.statements {
             eval(&stmt, "", "", &mut self.ctx);
         }
+
+        dbg!(&self.ctx.current_agent);
+
         Ok(())
     }
 
-    pub async fn handle(&mut self, input: &str) -> Option<String> {
+    pub async fn handle_core(&mut self, input: &str) -> Option<String> {
         self.ctx.set_mem("short", "msg", input);
 
         if let Some(Statement::AgentDeclaration { body, .. }) = self.ctx.current_agent.clone() {
@@ -43,6 +46,13 @@ impl BaseAgent {
             }
         }
         None
+    }
+
+    pub async fn handle(&mut self, input: &str, ctx: &mut Context) -> Option<String> {
+        let output = self.handle_core(input).await;
+        self.flush_to_global_short(ctx);
+        self.flush_to_global_long(ctx).await;
+        output
     }
 
     pub fn flush_to_global_short(&self, ctx: &mut Context) {

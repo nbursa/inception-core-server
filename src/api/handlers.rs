@@ -116,6 +116,8 @@ pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     agent.flush_to_global_short(&mut ctx);
     agent.flush_to_global_long(&ctx).await;
 
+    println!("Agent response: {:?}", response);
+
     axum::Json(response.unwrap_or_else(|| "No response.".to_string()))
 }
 
