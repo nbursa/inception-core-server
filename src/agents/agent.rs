@@ -23,8 +23,9 @@ impl BaseAgent {
         let mut lexer = Lexer::new(code.trim());
         let mut parser = Parser::new(&mut lexer);
         let program = parser.parse_program();
+        let mut output = Vec::new();
         for stmt in program.statements {
-            eval(&stmt, "", "", &mut self.ctx);
+            eval(&stmt, "", "", &mut self.ctx, &mut output);
         }
 
         dbg!(&self.ctx.current_agent);
@@ -36,10 +37,11 @@ impl BaseAgent {
         self.ctx.set_mem("short", "msg", input);
 
         if let Some(Statement::AgentDeclaration { body, .. }) = self.ctx.current_agent.clone() {
+            let mut output = Vec::new();
             for stmt in body {
                 if let Statement::OnInput { body, .. } = stmt {
                     for inner in body {
-                        eval(&inner, "", input, &mut self.ctx);
+                        eval(&inner, "", input, &mut self.ctx, &mut output);
                     }
                     return self.ctx.output.clone();
                 }
