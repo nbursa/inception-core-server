@@ -32,7 +32,9 @@ async fn main() {
         .set(LongTermMemory::new(&settings.database_url).await)
         .unwrap();
     LATENT_MEM
-        .set(LatentMemory::new(settings.chromadb_url.clone()).await)
+        .set(Arc::new(Mutex::new(
+            LatentMemory::new(settings.chromadb_url.clone()).await,
+        )))
         .unwrap();
 
     let mut base_agent = BaseAgent::new(

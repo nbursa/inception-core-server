@@ -3,12 +3,14 @@ use crate::memory::latent::LatentMemory;
 use crate::memory::long_term::LongTermMemory;
 use crate::memory::semantic::LatentGraph;
 use crate::memory::short_term::ShortTermMemory;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct Context {
     pub mem_short: ShortTermMemory,
     pub mem_long: LongTermMemory,
-    pub mem_latent: LatentMemory,
+    pub mem_latent: Arc<Mutex<LatentMemory>>,
     pub mem_semantic: LatentGraph,
 }
 
@@ -26,6 +28,16 @@ impl Context {
                 .clone(),
             mem_semantic: LatentGraph::default(),
         }
+    }
+
+    pub async fn embed_latent(&self, id: &str, vec: Vec<f32>) -> Result<(), String> {
+        let lock = self.mem_latent.lock().await;
+        lock.embed(id, vec).await
+    }
+
+    pub async fn query_latent(&self, vec: Vec<f32>) -> Result<Vec<String>, String> {
+        let lock = self.mem_latent.lock().await;
+        lock.query(vec).await
     }
 
     pub fn set_short(&self, key: &str, value: &str) {
@@ -52,11 +64,11 @@ impl Context {
         self.mem_long.get(key).await
     }
 
-    pub async fn embed_latent(&self, id: &str, vec: Vec<f32>) -> Result<(), String> {
-        self.mem_latent.embed(id, vec).await
-    }
+    // pub async fn embed_latent(&self, id: &str, vec: Vec<f32>) -> Result<(), String> {
+    //     self.mem_latent.embed(id, vec).await
+    // }
 
-    pub async fn query_latent(&self, vec: Vec<f32>) -> Result<Vec<String>, String> {
-        self.mem_latent.query(vec).await
-    }
+    // pub async fn query_latent(&self, vec: Vec<f32>) -> Result<Vec<String>, String> {
+    //     self.mem_latent.query(vec).await
+    // }
 }

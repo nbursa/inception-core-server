@@ -1,5 +1,7 @@
 use crate::agents::AGENT;
+use crate::api::echo::{EchoRequest, EchoResponse, handle_echo};
 use crate::icore::context::Context;
+use crate::icore::embed::embed_text;
 use crate::memory::semantic::latent_graph::SEMANTIC_GRAPH;
 use crate::memory::semantic::object::{AffectScore, ObjectCluster};
 use crate::memory::semantic::reflect::reflect;
@@ -12,11 +14,13 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::sync::Arc;
 use std::sync::OnceLock;
+use tokio::sync::Mutex;
 
 pub static SHORT_MEM: OnceLock<ShortTermMemory> = OnceLock::new();
 pub static LONG_MEM: OnceLock<LongTermMemory> = OnceLock::new();
-pub static LATENT_MEM: OnceLock<LatentMemory> = OnceLock::new();
+pub static LATENT_MEM: OnceLock<Arc<Mutex<LatentMemory>>> = OnceLock::new();
 
 fn mem() -> &'static ShortTermMemory {
     SHORT_MEM.get().expect("Short-term memory not initialized")
@@ -80,12 +84,16 @@ pub struct EmbedPayload {
     content: String,
 }
 
-pub async fn embed_latent(Json(_payload): Json<EmbedPayload>) -> impl IntoResponse {
+pub async fn embed_latent(Json(payload): Json<EmbedPayload>) -> impl IntoResponse {
+    let Ok(vec) = embed_text(&payload.content).await else {
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    };
+
     let mem = LATENT_MEM.get().unwrap();
-    let dummy_vec = vec![0.0; 1536];
-    match mem.embed(&_payload.id, dummy_vec).await {
-        Ok(_) => (StatusCode::OK, "embedded"),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "error"),
+    let lock = mem.lock().await;
+    match lock.query(vec).await {
+        Ok(ids) => axum::Json(json!({ "ids": ids })).into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }
 }
 
@@ -99,7 +107,8 @@ pub async fn query_latent(
 ) -> Result<axum::Json<Vec<String>>, (StatusCode, String)> {
     let mem = LATENT_MEM.get().unwrap();
     let dummy_vec = vec![0.0; 1536];
-    match mem.query(dummy_vec).await {
+    let lock = mem.lock().await;
+    match lock.query(dummy_vec).await {
         Ok(ids) => Ok(axum::Json(ids)),
         Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e)),
     }
@@ -108,21 +117,6 @@ pub async fn query_latent(
 #[derive(Deserialize)]
 pub struct ChatPayload {
     message: String,
-}
-
-#[debug_handler]
-pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
-    let agent_lock = AGENT.get().unwrap().clone();
-    let mut agent = agent_lock.lock().await;
-
-    let mut ctx = Context::new();
-    let response = agent.handle(&payload.message, &mut ctx).await;
-    agent.flush_to_global_short(&mut ctx);
-    agent.flush_to_global_long(&ctx).await;
-
-    println!("Agent response: {:?}", response);
-
-    axum::Json(response.unwrap_or_else(|| "No response.".to_string()))
 }
 
 #[debug_handler]
@@ -207,4 +201,63 @@ pub async fn reflect_semantic(Path(id): Path<String>) -> impl IntoResponse {
     let graph = SEMANTIC_GRAPH.lock().unwrap();
     let result = reflect(&graph, &id);
     (StatusCode::OK, Json(result))
+}
+
+#[axum::debug_handler]
+pub async fn echo_handler(Json(payload): Json<EchoRequest>) -> Json<EchoResponse> {
+    let response = handle_echo(payload).await;
+    Json(response)
+}
+
+#[debug_handler]
+pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
+    let input = payload.message.trim();
+    let timestamp = chrono::Utc::now().timestamp_millis();
+    let id = format!("chat_{}", timestamp);
+
+    let agent_lock = AGENT.get().unwrap().clone();
+    let mut agent = agent_lock.lock().await;
+    let mut ctx = Context::new();
+
+    // 1. Embed input (llama.cpp)
+    let embed_vec = match crate::icore::embed::embed_text(input).await {
+        Ok(vec) => vec,
+        Err(e) => {
+            eprintln!("Embedding failed: {}", e);
+            vec![0.0; 1536]
+        }
+    };
+
+    let _ = ctx.embed_latent(&id, embed_vec.clone()).await;
+
+    // 2. Semantic cluster
+    {
+        let mut graph = SEMANTIC_GRAPH.lock().unwrap();
+        let cluster = ObjectCluster {
+            name: id.clone(),
+            embedding: embed_vec,
+            tags: vec!["chat_input".to_string()],
+            affect: AffectScore::from_value(0.0),
+            known: true,
+        };
+        graph.add_cluster(id.clone(), cluster);
+    }
+
+    // 3. Handle input
+    let response = agent.handle(input, &mut ctx).await;
+    let output = response
+        .clone()
+        .unwrap_or_else(|| "No response.".to_string());
+
+    // 4. Persist to memory
+    ctx.set_short("last_input", input);
+    ctx.set_short("last_output", &output);
+    ctx.set_long(&format!("input_{}", timestamp), input).await;
+    ctx.set_long(&format!("output_{}", timestamp), &output)
+        .await;
+
+    agent.flush_to_global_short(&mut ctx);
+    agent.flush_to_global_long(&ctx).await;
+
+    axum::Json(output)
 }
