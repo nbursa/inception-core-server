@@ -1,5 +1,4 @@
 use crate::agents::AGENT;
-use crate::api::echo::{EchoRequest, EchoResponse, handle_echo};
 use crate::icore::context::Context;
 use crate::icore::embed::embed_text;
 use crate::memory::semantic::latent_graph::SEMANTIC_GRAPH;
@@ -203,12 +202,6 @@ pub async fn reflect_semantic(Path(id): Path<String>) -> impl IntoResponse {
     (StatusCode::OK, Json(result))
 }
 
-#[axum::debug_handler]
-pub async fn echo_handler(Json(payload): Json<EchoRequest>) -> Json<EchoResponse> {
-    let response = handle_echo(payload).await;
-    Json(response)
-}
-
 #[debug_handler]
 pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     let input = payload.message.trim();
@@ -220,7 +213,7 @@ pub async fn chat(Json(payload): Json<ChatPayload>) -> axum::Json<String> {
     let mut ctx = Context::new();
 
     // 1. Embed input (llama.cpp)
-    let embed_vec = match crate::icore::embed::embed_text(input).await {
+    let embed_vec = match embed_text(input).await {
         Ok(vec) => vec,
         Err(e) => {
             eprintln!("Embedding failed: {}", e);
