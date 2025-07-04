@@ -7,7 +7,7 @@
 ![Build](https://img.shields.io/badge/build-manual-lightgrey)
 
 > **Inception core (ICORE) Server**  
-> A modular, extensible Rust-based server providing short-term, long-term, and latent memory services, a chat endpoint backed by a BaseAgent + Sentience DSL, and seamless integration with ChromaDB and LLM services.
+> A modular, extensible Rust-based server providing short-term, long-term, and latent memory services, a chat endpoint with a BaseAgent + Sentience DSL, and integration with ChromaDB and LLM services.
 
 > ⚠️ **Work In Progress**: This project is under active development. Interfaces, APIs, and internal structure may change frequently.
 
