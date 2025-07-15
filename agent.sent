@@ -1,7 +1,16 @@
 agent Echo {
   mem short
-  goal: "Test agent"
+  goal: "Chat with user"
+
   on input(msg) {
-    output = msg
+    if context includes ["hello", "hi", "hey"] {
+      output = "Hello! How can I help you?"
+    }
+    if context includes ["bye", "goodbye"] {
+      output = "Goodbye!"
+    }
+    if output == "" {
+      output = "Sorry, I didn't understand."
+    }
   }
 }
